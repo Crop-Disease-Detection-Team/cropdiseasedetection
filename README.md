@@ -492,4 +492,198 @@ dashboard
 * OTP resend cooldown protection
 * Role-based authorization
 * Secure authentication workflow
+---
+
+### Pilot Data Collection for Testing and Generalization
+
+## **Date:** 30 May 2026
+
+## Overview
+
+This folder contains the pilot data collection samples used for testing the Crop Disease Detection System on unseen real-world images.
+
+The purpose of this pilot dataset is to evaluate how well the trained model generalizes beyond the original PlantVillage training dataset. These images were collected separately from the training data and are used as ground-truth samples for model evaluation and performance validation.
+
+---
+
+# Objective
+
+The primary objectives of this pilot data collection are:
+
+* Evaluate model performance on unseen images
+* Measure real-world generalization capability
+* Verify disease classification accuracy
+* Validate healthy vs diseased plant detection
+* Create a ground-truth benchmark dataset
+* Analyze prediction reliability outside the training environment
+
+---
+
+# Dataset Categories
+
+The pilot dataset contains three categories of plant leaf images:
+
+| Category       | Description                      |
+| -------------- | -------------------------------- |
+| Healthy Corn   | Healthy corn leaf samples        |
+| Diseased Peach | Peach leaves affected by disease |
+| Healthy Peach  | Healthy peach leaf samples       |
+
+---
+
+# Image Indexing Scheme
+
+To simplify evaluation and ground-truth verification, all images have been indexed sequentially.
+
+## Ground Truth Mapping
+
+| Image Index Range | Ground Truth Class |
+| ----------------- | ------------------ |
+| 1 – 100           | Healthy Corn       |
+| 101 – 200         | Diseased Peach     |
+| 201 – 250         | Healthy Peach      |
+
+---
+
+# Purpose of Index-Based Labeling
+
+The indexing system was designed to:
+
+* Maintain consistent ground-truth records
+* Simplify prediction analysis
+* Support error tracking
+* Enable confusion matrix generation
+* Facilitate model performance evaluation
+* Compare predicted labels against actual labels
+
+---
+
+# Testing Methodology
+
+The pilot images are not part of the training dataset.
+
+Instead, they are used exclusively for testing and validation to determine whether the model can successfully recognize plant species and disease conditions on previously unseen data.
+
+Testing Process:
+
+```text
+Pilot Image
+      ↓
+Image Preprocessing
+      ↓
+Trained EfficientNet Model
+      ↓
+Prediction
+      ↓
+Ground Truth Comparison
+      ↓
+Performance Evaluation
+```
+
+---
+# Pilot Data Collection - Proof of Work
+
+This section provides visual proof of the pilot dataset used for testing and evaluating the model's generalization capability on unseen data.
+
+The dataset includes **Healthy Corn**, **Healthy Peach**, and **Diseased Peach** samples, along with proof-of-collection images.
+
+---
+
+##  Healthy Corn Samples
+
+<p align="center">
+
+<img src="pilot_data_collection_proofandsamples/Healthy_corn_samples/healthy_corn_sample.1.jpeg" width="250"/>
+<img src="pilot_data_collection_proofandsamples/Healthy_corn_samples/healthy_corn_sample.2.jpeg" width="250"/>
+<img src="pilot_data_collection_proofandsamples/Healthy_corn_samples/Healthy_corn_sample.3.jpeg" width="250"/>
+
+</p>
+
+---
+
+##  Peach Samples (Healthy & Diseased)
+
+### Diseased Peach
+
+<p align="center">
+
+<img src="pilot_data_collection_proofandsamples/Peachsamples/Disease_peach_sample.1.jpeg" width="250"/>
+<img src="pilot_data_collection_proofandsamples/Peachsamples/Disease_peach_sample.2.jpeg" width="250"/>
+
+</p>
+
+---
+
+### Healthy Peach
+
+<p align="center">
+
+<img src="pilot_data_collection_proofandsamples/Peachsamples/peach_healthy_sample.1.jpeg" width="250"/>
+<img src="pilot_data_collection_proofandsamples/Peachsamples/peach_healthy_sample.2.jpeg" width="250"/>
+
+</p>
+
+---
+
+##  Proof of Data Collection
+
+<p align="center">
+
+<img src="pilot_data_collection_proofandsamples/Proof_of_work/proof_of_pilot_data_of_corn_healthy.jpeg" width="350"/>
+<img src="pilot_data_collection_proofandsamples/Proof_of_work/proof_of_pilot_data_of_peach_healthyandUnheathy.jpeg" width="350"/>
+
+</p>
+
+---
+# Ground Truth Verification
+
+Each image index corresponds to a known class label.
+
+Example:
+
+```text
+5.jpg  → Healthy Corn
+145.jpg  → Diseased Peach
+223.jpg  → Healthy Peach
+```
+
+This mapping allows accurate comparison between:
+
+* Actual class (Ground Truth)
+* Predicted class (Model Output)
+
+---
+
+# Importance of Pilot Testing
+
+Pilot testing provides evidence that the model is capable of:
+
+* Generalizing to new environments
+* Handling unseen image samples
+* Reducing dataset-specific bias
+* Producing reliable real-world predictions
+* Supporting deployment readiness
+
+---
+
+# Proof of Data Collection
+
+This folder serves as documented proof of the pilot data collection process and contains representative image samples used during testing and evaluation.
+
+The indexed images provide traceable references that can be used for:
+
+* Accuracy assessment
+* Result verification
+* Research documentation
+* Model validation experiments
+
+---
+
+# Conclusion
+
+The pilot data collection dataset was created to assess the generalization performance of the Crop Disease Detection System on previously unseen plant leaf images. Through indexed ground-truth labeling and structured evaluation, the dataset provides a reliable benchmark for validating the effectiveness of the trained EfficientNet-based disease classification model in real-world scenarios.
+
+Data collection is on going. Thank you. (Parallel work : Model is being train.....(We go through EfficentNet rather then MoblieNetv2).
+
+Thank you !!.
 

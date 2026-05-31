@@ -1102,13 +1102,13 @@ Fallback mode is available if the trained model file is unavailable.
 
 ✅ User Dashboard
 
-✅ Disease Library
+Disease Library  (ongoing)
 
 ✅ Profile Management
 
 ✅ History Tracking
 
-✅ Disease Prediction API
+ Disease Prediction API(ongoing)
 
 ✅ Scan Statistics
 

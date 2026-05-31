@@ -686,4 +686,448 @@ The pilot data collection dataset was created to assess the generalization perfo
 Data collection is on going. Thank you. (Parallel work : Model is being train.....(We go through EfficentNet rather then MoblieNetv2).
 
 Thank you !!.
+---
+### Crop Disease Detection System – Development Progress Update
+
+# **Date:** 31 May 2026
+--
+## Overview
+
+This update summarizes the work completed on the Crop Disease Detection System, including the pilot dataset evaluation conducted previously and the implementation of the User Dashboard, History Page, and User Backend APIs.
+
+---
+
+# Previous Work Summary
+
+## Pilot Data Collection for Model Generalization Testing
+
+A pilot testing dataset was created to evaluate the trained EfficientNet model on previously unseen plant leaf images.
+
+### Dataset Categories
+
+| Class          | Image Range |
+| -------------- | ----------- |
+| Healthy Corn   | 1 – 100     |
+| Diseased Peach | 101 – 200   |
+| Healthy Peach  | 201 – 250   |
+
+### Purpose
+
+* Evaluate model performance on unseen data
+* Verify generalization capability
+* Compare predictions against ground truth labels
+* Create a testing benchmark separate from PlantVillage training data
+* Validate real-world applicability of the model
+
+### Proof of Work
+
+The repository includes:
+
+* Healthy corn sample images
+* Diseased peach sample images
+* Healthy peach sample images
+* Pilot data collection evidence images
+* Ground-truth indexing documentation
+
+---
+
+# User Dashboard Implementation
+
+## File
+
+```text
+web-frontend/user-dashboard.html
+```
+
+## Overview
+
+The User Dashboard serves as the primary interface for authenticated farmers and agricultural users.
+
+It provides quick access to scan history, disease information, profile management, and crop disease resources.
+
+---
+
+## Key Features
+
+### Statistics Overview
+
+Displays:
+
+* Total scans performed
+* Average prediction confidence
+
+Data Source:
+
+```http
+GET /api/user/statistics
+```
+
+---
+
+### Recent Scan Activity
+
+Shows:
+
+* Disease name
+* Confidence score
+* Scan date
+
+Displays the five most recent predictions.
+
+Data Source:
+
+```http
+GET /api/user/history?page=1&per_page=5
+```
+
+---
+
+### Crop Disease Library
+
+Features:
+
+* Search functionality
+* Disease filtering
+* Disease images
+* Severity indicators
+* Pagination support
+
+Data Source:
+
+```http
+GET /api/user/diseases?per_page=100
+```
+
+---
+
+### Profile Management
+
+Users can:
+
+* Update personal information
+* Upload profile pictures
+* Manage account settings
+
+Data Sources:
+
+```http
+GET  /api/auth/me
+PUT  /api/auth/update-profile
+POST /api/auth/upload-profile-pic
+```
+
+---
+
+### Account Controls
+
+Accessible through the navigation menu:
+
+* Edit Personal Details
+* Change Password
+* Delete Scan History
+* Logout
+
+---
+
+# History Page Implementation
+
+## File
+
+```text
+web-frontend/history.html
+```
+
+## Overview
+
+The History Page provides a complete record of previous disease predictions made by the user.
+
+---
+
+## Features
+
+### Prediction History Table
+
+Displays:
+
+* Leaf image thumbnail
+* Disease name
+* Confidence percentage
+* Severity level
+* Scan date
+
+---
+
+### Search Functionality
+
+Allows filtering by disease name.
+
+---
+
+### Severity Filtering
+
+Supported filters:
+
+* High
+* Medium
+* Low
+
+---
+
+### Pagination
+
+Displays:
+
+* 10 records per page
+* Backend-managed pagination
+
+Data Source:
+
+```http
+GET /api/user/history?page=1&per_page=10
+```
+
+---
+
+### Disease Detail Navigation
+
+Selecting a history record redirects to:
+
+```text
+disease-detail.html?id=<disease_id>
+```
+
+for detailed disease information.
+
+---
+
+# Backend Development
+
+## File
+
+```text
+backend/user.py
+```
+
+## Overview
+
+The User Blueprint manages all user-specific operations under:
+
+```text
+/api/user
+```
+
+All routes require JWT authentication.
+
+---
+
+# Implemented API Endpoints
+
+| Endpoint       | Method | Description              |
+| -------------- | ------ | ------------------------ |
+| /diseases      | GET    | Retrieve all diseases    |
+| /diseases/<id> | GET    | Retrieve disease details |
+| /predict       | POST   | Run disease prediction   |
+| /history       | GET    | Retrieve scan history    |
+| /history       | DELETE | Delete scan history      |
+| /statistics    | GET    | Retrieve user statistics |
+
+---
+
+# Disease Prediction Pipeline
+
+## Endpoint
+
+```http
+POST /api/user/predict
+```
+
+### Workflow
+
+1. User uploads leaf image
+2. Image is received through request.files
+3. ML model performs inference
+4. Prediction result is generated
+5. Scan record is saved
+6. Response returned to frontend
+
+---
+
+## Storage Process
+
+Prediction results include:
+
+* Disease name
+* Confidence score
+* Severity
+* Recommendation
+* Scan timestamp
+* Uploaded image path
+
+Images are stored in:
+
+```text
+uploads/
+```
+
+using UUID-based filenames.
+
+---
+
+# Scan History Management
+
+## Delete History
+
+Endpoint:
+
+```http
+DELETE /api/user/history
+```
+
+Features:
+
+* Deletes all user scan records
+* Returns deletion count
+* Updates dashboard statistics
+
+---
+
+# Statistics Module
+
+## Endpoint
+
+```http
+GET /api/user/statistics
+```
+
+Returns:
+
+* Total scans
+* Average confidence score
+
+Implemented using SQLAlchemy aggregation functions:
+
+* count()
+* avg()
+
+---
+
+# Database Models Used
+
+## User
+
+Stores:
+
+* User profile information
+* Authentication data
+* Profile image
+
+---
+
+## Disease
+
+Stores:
+
+* Disease details
+* Crop type
+* Symptoms
+* Recommendations
+* Treatment information
+
+---
+
+## ScanHistory
+
+Stores:
+
+* User ID
+* Uploaded image
+* Prediction result
+* Confidence score
+* Severity
+* Scan timestamp
+
+---
+
+# Integration Notes
+
+## Backend URL
+
+```text
+http://localhost:5000
+```
+
+---
+
+## Authentication
+
+All requests require:
+
+```http
+Authorization: Bearer <access_token>
+```
+
+The token is stored in:
+
+```javascript
+localStorage
+```
+
+after successful login.
+
+---
+
+## ML Model Integration (discused and ongoing)
+
+The backend loads the prediction model through:
+
+```text
+ml_model.py
+```
+
+Capabilities:
+
+* Disease prediction
+* Crop identification
+* Confidence scoring
+
+Fallback mode is available if the trained model file is unavailable.
+
+---
+
+# Current Project Status
+
+✅ User Authentication System
+
+✅ Email Verification Workflow
+
+✅ User Dashboard
+
+✅ Disease Library
+
+✅ Profile Management
+
+✅ History Tracking
+
+✅ Disease Prediction API
+
+✅ Scan Statistics
+
+ Pilot Dataset Collection(on going)
+
+ Ground Truth Evaluation Dataset(ongoing)
+
+EfficientNet-Based Crop Disease Classification Model (ongoing)
+
+---
+
+# Next Development Targets
+
+* Disease Detail Enhancements
+* Admin Dashboard Features
+* Model Performance Reporting
+* Confusion Matrix Evaluation
+* Mobile Application Integration
+* Production Deployment
+* Cloud Storage Integration
+* Real-Time Camera Detection
 

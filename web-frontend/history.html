@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Scan History | Crop Disease AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #F0F2F5; min-height: 100vh; }
+    .navbar { background: #1a2e1f; padding: 0.8rem 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .logo { font-size: 1.3rem; font-weight: 600; color: white; text-decoration: none; }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-links a { color: rgba(255,255,255,0.85); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    .nav-links a:hover { color: white; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+    .card { background: white; border-radius: 24px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 2rem; }
+    .card-header { background: #1a2e1f; color: white; padding: 1rem 1.5rem; font-weight: 600; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .filter-group { display: flex; gap: 10px; }
+    .filter-group input, .filter-group select { padding: 6px 12px; border-radius: 20px; border: none; font-size: 0.8rem; width: 200px; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #EDF2ED; }
+    th { background: #F8FAF8; font-weight: 600; color: #1a2e1f; }
+    tr:hover { background: #F8FAF8; cursor: pointer; }
+    .confidence-badge { background: #E8F5E9; color: #2E7D32; padding: 2px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+    .severity-high { color: #DC2626; font-weight: 600; }
+    .severity-medium { color: #D97706; font-weight: 600; }
+    .severity-low { color: #10B981; font-weight: 600; }
+    .image-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 8px; background: #E2E8E2; display: inline-flex; align-items: center; justify-content: center; }
+    .pagination { display: flex; justify-content: center; gap: 8px; margin: 1.5rem 0; }
+    .page-btn { padding: 8px 12px; border: 1px solid #E2E8E2; background: white; border-radius: 8px; cursor: pointer; }
+    .page-btn.active { background: #1a2e1f; color: white; border-color: #1a2e1f; }
+    .page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .empty-state { text-align: center; padding: 3rem; color: #8A9A8A; }
+    /* Modal */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; backdrop-filter: blur(4px); }
+    .modal-content { background: white; border-radius: 24px; max-width: 550px; width: 90%; max-height: 85vh; overflow-y: auto; animation: fadeInUp 0.3s ease; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .modal-header { padding: 1.5rem; background: #1a2e1f; color: white; display: flex; justify-content: space-between; align-items: center; border-radius: 24px 24px 0 0; }
+    .modal-header h3 { font-size: 1.2rem; }
+    .close-modal { background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer; }
+    .modal-body { padding: 1.5rem; }
+    .detail-group { margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid #EDF2ED; }
+    .detail-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #8A9A8A; margin-bottom: 0.25rem; }
+    .detail-value { font-size: 0.95rem; font-weight: 500; color: #2D3A2D; line-height: 1.4; }
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      th, td { padding: 8px; font-size: 0.8rem; }
+      .card-header { flex-direction: column; align-items: stretch; }
+      .filter-group { flex-direction: column; }
+      .filter-group input, .filter-group select { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="user-dashboard.html" class="logo"> CropDisease AI</a>
+  <div class="nav-links">
+    <a href="user-dashboard.html">Dashboard</a>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="card">
+    <div class="card-header">
+      <span>Scan History</span>
+      <div class="filter-group">
+        <input type="text" id="searchInput" placeholder="Search disease..." onkeyup="debounceSearch()">
+        <select id="severityFilter" onchange="applyFilters()">
+          <option value="">All Severities</option>
+          <option value="High">High</option>
+          <option value="Medium">Medium</option>
+          <option value="Low">Low</option>
+        </select>
+      </div>
+    </div>
+    <div style="overflow-x: auto;">
+      <table id="historyTable">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Disease</th>
+            <th>Confidence</th>
+            <th>Severity</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody">
+          <tr><td colspan="5" style="text-align:center;">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+  </div>
+</div>
+
+<!-- Disease Detail Modal -->
+<div id="diseaseModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalDiseaseName">Disease Details</h3>
+      <button class="close-modal" onclick="closeDiseaseModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody">Loading...</div>
+  </div>
+</div>
+
+<script>
+  const API_URL = 'http://localhost:5000/api';
+  const BASE_URL = 'http://localhost:5000';
+  let currentPage = 1;
+  let totalPages = 1;
+  let currentSearch = '';
+  let currentSeverity = '';
+  let searchTimeout = null;
+
+  function debounceSearch() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => applyFilters(), 500);
+  }
+
+  async function getToken() {
+    let token = localStorage.getItem('access_token');
+    if (!token) window.location.href = 'login.html';
+    return token;
+  }
+
+  async function loadHistory(page = 1) {
+    const token = await getToken();
+    if (!token) return;
+    const tbody = document.getElementById('historyBody');
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>';
+    let url = `${API_URL}/user/history?page=${page}&per_page=10`;
+    if (currentSearch) url += `&search=${encodeURIComponent(currentSearch)}`;
+    try {
+      const response = await fetch(url, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Failed to load');
+      let scans = data.scans || [];
+      totalPages = data.pages || 1;
+      currentPage = data.page;
+      if (currentSeverity) {
+        scans = scans.filter(scan => (scan.severity || '').toLowerCase() === currentSeverity.toLowerCase());
+      }
+      if (scans.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No scan records found</td></tr>';
+      } else {
+        tbody.innerHTML = scans.map(scan => {
+          let imgHtml = '';
+          if (scan.image_url) {
+            let imgUrl = scan.image_url;
+            if (!imgUrl.startsWith('http')) imgUrl = `${BASE_URL}${imgUrl}`;
+            imgHtml = `<img src="${imgUrl}" class="image-thumb" onerror="this.src='https://placehold.co/50x50?text=No+Image'">`;
+          } else {
+            imgHtml = '<span class="image-thumb">📷</span>';
+          }
+          const severityClass = (scan.severity || '').toLowerCase();
+          return `
+            <tr onclick="fetchDiseaseDetails('${escapeHtml(scan.disease_name)}')">
+              <td>${imgHtml}</td>
+              <td><strong>${escapeHtml(scan.disease_name)}</strong></td>
+              <td><span class="confidence-badge">${scan.confidence}%</span></td>
+              <td class="severity-${severityClass}">${scan.severity || 'N/A'}</td>
+              <td>${new Date(scan.scanned_at).toLocaleString()}</td>
+            </tr>
+          `;
+        }).join('');
+      }
+      renderPagination();
+    } catch (err) {
+      console.error(err);
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">Error: ${err.message}</td></tr>`;
+    }
+  }
+
+  function renderPagination() {
+    const container = document.getElementById('pagination');
+    if (totalPages <= 1) {
+      container.innerHTML = '';
+      return;
+    }
+    let html = `<button class="page-btn" onclick="changePage(${currentPage-1})" ${currentPage === 1 ? 'disabled' : ''}>Previous</button>`;
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+    }
+    html += `<button class="page-btn" onclick="changePage(${currentPage+1})" ${currentPage === totalPages ? 'disabled' : ''}>Next</button>`;
+    container.innerHTML = html;
+  }
+
+  function changePage(page) {
+    if (page < 1 || page > totalPages) return;
+    loadHistory(page);
+  }
+
+  function applyFilters() {
+    currentSearch = document.getElementById('searchInput').value;
+    currentSeverity = document.getElementById('severityFilter').value;
+    loadHistory(1);
+  }
+
+  async function fetchDiseaseDetails(diseaseName) {
+    const token = await getToken();
+    try {
+      const res = await fetch(`${API_URL}/user/diseases`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const disease = data.diseases.find(d => d.disease_name === diseaseName);
+      if (disease) {
+        window.location.href = `disease-detail.html?id=${disease.id}`;
+      } else {
+        showDiseaseModal(diseaseName, 'Full details available in the Crop Library.');
+      }
+    } catch (err) {
+      console.error(err);
+      showDiseaseModal(diseaseName, 'Could not load detailed information. Please check the Crop Library.');
+    }
+  }
+
+  function showDiseaseModal(diseaseName, message) {
+    const modal = document.getElementById('diseaseModal');
+    document.getElementById('modalDiseaseName').innerText = diseaseName;
+    document.getElementById('modalBody').innerHTML = `
+      <div class="detail-group">
+        <div class="detail-label">Disease</div>
+        <div class="detail-value">${escapeHtml(diseaseName)}</div>
+      </div>
+      <div class="detail-group">
+        <div class="detail-label">Information</div>
+        <div class="detail-value">${escapeHtml(message)}</div>
+      </div>
+      <div class="detail-group">
+        <div class="detail-label">Recommendation</div>
+        <div class="detail-value">Check the Crop Library on the dashboard for treatment details.</div>
+      </div>
+    `;
+    modal.style.display = 'flex';
+  }
+
+  function closeDiseaseModal() {
+    document.getElementById('diseaseModal').style.display = 'none';
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  window.onclick = function(event) {
+    if (event.target === document.getElementById('diseaseModal')) closeDiseaseModal();
+  };
+
+  loadHistory();
+</script>
+</body>
+</html>

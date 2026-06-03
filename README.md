@@ -1130,4 +1130,116 @@ EfficientNet-Based Crop Disease Classification Model (ongoing)
 * Production Deployment
 * Cloud Storage Integration
 * Real-Time Camera Detection
+---
+### Plant Disease Classification Model Training
+-
+### Date: 6/3/2026
+
+Kaggle link : https://www.kaggle.com/code/bikramchapagain/projectmodel2
+
+ Project Type: Deep Learning (Image Classification)  
+ Architecture: EfficientNet-B3  
+ Framework: PyTorch  
+
+---
+
+##  Project Overview
+
+This project trains a deep learning model using EfficientNet-B3 architecture to classify plant diseases from leaf images.
+
+The model is trained on the PlantVillage dataset containing:
+- 38 total classes (24 diseases + 14 healthy categories)
+
+Crops covered:
+Apple, Blueberry, Cherry, Corn, Grape, Orange, Peach, Pepper, Potato, Raspberry, Soybean, Squash, Strawberry, Tomato
+
+---
+
+##  Dataset Information
+
+Source: PlantVillage Dataset (Kaggle)  
+Total Images: 5,403  
+Total Classes: 38  
+
+---
+
+## Model Architecture
+
+EfficientNet-B3 (pretrained on ImageNet)
+↓
+AdaptiveAvgPool2d
+↓
+Dropout (0.4)
+↓
+Linear (1536 → 512)
+↓
+GELU Activation
+↓
+Dropout (0.3)
+↓
+Linear (512 → 38)
+
+---
+
+##  Technologies Used
+
+Python 3.10+  
+PyTorch 2.0+  
+torchvision  
+EfficientNet-B3  
+scikit-learn  
+matplotlib  
+pandas  
+numpy  
+
+---
+
+## Training Pipeline
+
+1. Data Preprocessing (224x224, normalization)
+2. Data Augmentation (flip, rotation, color jitter)
+3. Train/Val/Test split (70/15/15)
+4. Model building (EfficientNet-B3)
+5. Training with AdamW optimizer
+6. Evaluation + metrics
+7. Save best model
+
+---
+
+## Results
+
+Validation Accuracy: 97.83%  
+Training Accuracy: 97.11%  
+Training Time: ~2.5 hours  
+
+---
+
+## How to Use
+
+1. Clone repo
+2. Install dependencies
+3. Download PlantVillage dataset
+4. Run train.ipynb
+5. Save best_model.pth
+
+---
+
+## Prediction
+
+Load trained model → preprocess image → get class + confidence score
+
+---
+
+## Credits
+
+Dataset: PlantVillage (Kaggle)  
+Model: EfficientNet (Google)  
+Framework: PyTorch  
+
+---
+
+##  Contact
+
+bikram204@gmail.com
+
 

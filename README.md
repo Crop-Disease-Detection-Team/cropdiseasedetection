@@ -1237,6 +1237,280 @@ Model: EfficientNet (Google)
 Framework: PyTorch  
 
 ---
+## Date: 6/3/2026
+--
+# Password Reset (`password_reset.py`) & Feedback (`feedback.py`)
+
+## 1. Password Reset Module (`password_reset.py`)
+
+The Password Reset module provides a secure password recovery mechanism using Email OTP (One-Time Password) verification. It allows users who have forgotten their passwords to reset them safely without requiring administrator intervention. The module integrates with the existing user authentication system and email service configuration.
+
+### Features
+
+#### Step 1: Request OTP
+
+The user submits their registered email address. The system generates a six-digit OTP and sends it to the provided email address. The OTP remains valid for five minutes.
+
+#### Step 2: Verify OTP
+
+The user enters the OTP received via email. The system validates the OTP and generates a temporary reset token for the password reset process.
+
+#### Step 3: Reset Password
+
+After successful OTP verification, the user submits a new password. The system validates the password strength, updates the user's password, and invalidates the OTP.
+
+---
+
+### API Endpoints
+
+| Endpoint                     | Method | Description                                           |
+| ---------------------------- | ------ | ----------------------------------------------------- |
+| `/api/auth/forgot-password`  | POST   | Sends an OTP to the user's registered email address.  |
+| `/api/auth/verify-reset-otp` | POST   | Verifies the OTP and returns a temporary reset token. |
+| `/api/auth/reset-password`   | POST   | Updates the user's password using the verified OTP.   |
+
+---
+
+### Request & Response Examples
+
+#### Request OTP
+
+**POST** `/api/auth/forgot-password`
+
+```json
+{
+  "email": "user@example.com"
+}
+```
+
+**Response (200)**
+
+```json
+{
+  "message": "OTP sent to your email"
+}
+```
+
+#### Verify OTP
+
+**POST** `/api/auth/verify-reset-otp`
+
+```json
+{
+  "email": "user@example.com",
+  "otp": "123456"
+}
+```
+
+**Response (200)**
+
+```json
+{
+  "message": "OTP verified",
+  "reset_token": "eyJhbGc..."
+}
+```
+
+#### Reset Password
+
+**POST** `/api/auth/reset-password`
+
+```json
+{
+  "email": "user@example.com",
+  "otp": "123456",
+  "new_password": "NewStrongP@ssw0rd"
+}
+```
+
+**Response (200)**
+
+```json
+{
+  "message": "Password reset successful!"
+}
+```
+
+---
+
+### Security Features
+
+* OTP expires automatically after 5 minutes.
+* OTP values are stored securely in the user table.
+* Temporary reset tokens use JWT and have a short validity period.
+* Password complexity requirements include:
+
+  * Minimum 8 characters
+  * At least one uppercase letter
+  * At least one lowercase letter
+  * At least one numeric digit
+  * At least one special character
+* OTP becomes invalid immediately after successful password reset.
+
+---
+
+### Integration Requirements
+
+* SMTP email configuration must be properly configured.
+* Frontend implementation should follow a three-step flow:
+
+  1. Email submission
+  2. OTP verification
+  3. New password creation
+* After a successful reset, users should be redirected to the login page.
+
+---
+
+# 2. Feedback Module (`feedback.py`)
+
+The Feedback module enables authenticated users to submit bug reports, feature requests, and general feedback directly from the application. Administrators can review, manage, and monitor submitted feedback through dedicated API endpoints.
+
+### Features
+
+* Submit feedback as an authenticated user.
+* Report bugs and issues.
+* Request new features and improvements.
+* Send general suggestions or comments.
+* Admin-only feedback management.
+* Retrieve individual feedback details.
+* Delete feedback entries.
+* Extensible support for status updates and administrator responses.
+
+---
+
+### API Endpoints
+
+| Endpoint             | Method | Description                                        |
+| -------------------- | ------ | -------------------------------------------------- |
+| `/api/feedback`      | POST   | Submit new feedback (requires JWT authentication). |
+| `/api/feedback`      | GET    | Retrieve all feedback records (Admin only).        |
+| `/api/feedback/<id>` | GET    | Retrieve a specific feedback entry (Admin only).   |
+| `/api/feedback/<id>` | DELETE | Delete a feedback entry (Admin only).              |
+
+---
+
+### Submit Feedback Example
+
+**POST** `/api/feedback`
+
+```json
+{
+  "type": "bug",
+  "subject": "Upload error",
+  "message": "Predict page gives 500 error",
+  "attachments": null
+}
+```
+
+**Response (201)**
+
+```json
+{
+  "id": 42,
+  "message": "Feedback submitted. Thank you!"
+}
+```
+
+---
+
+### Retrieve Feedback (Admin)
+
+**GET** `/api/feedback`
+
+**Response (200)**
+
+```json
+{
+  "feedback": [
+    {
+      "id": 42,
+      "user_id": 5,
+      "user_name": "roshan23",
+      "type": "bug",
+      "subject": "Upload error",
+      "message": "Predict page gives 500 error",
+      "status": "pending",
+      "created_at": "2025-05-31T10:30:00Z"
+    }
+  ]
+}
+```
+
+---
+
+### Database Model Example
+
+```python
+class Feedback(db.Model):
+    __tablename__ = 'feedback'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('users.id'),
+        nullable=False
+    )
+
+    type = db.Column(db.String(20), nullable=False)
+    subject = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+
+    status = db.Column(
+        db.String(20),
+        default='pending'
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    user = db.relationship(
+        'User',
+        backref='feedback'
+    )
+```
+
+---
+
+### Administrator Requirements
+
+* Administrative endpoints must verify:
+
+  ```python
+  current_user.role == 'admin'
+  ```
+
+* Feedback records can be:
+
+  * Filtered by type
+  * Filtered by status
+  * Paginated for large datasets
+  * Extended with response and resolution workflows
+
+---
+
+### Frontend Integration
+
+A feedback section should be accessible from the user dashboard, preferably through the navigation menu or user profile dropdown.
+
+Recommended form fields:
+
+* Feedback Type (Bug / Feature / General)
+* Subject
+* Message
+* Optional Attachment
+
+After successful submission, the frontend should display a confirmation message or notification.
+
+---
+
+### Notes
+
+* Both modules are designed to work independently and can be integrated without significant changes to the existing authentication or dashboard systems.
+* Password reset functionality requires valid SMTP credentials and email service configuration.
+* The implementation can be extended to support feedback replies, ticket tracking, and notification systems.
+* API routes and behaviors should be updated if future changes are made to the backend architecture.
 
 ##  Contact
 

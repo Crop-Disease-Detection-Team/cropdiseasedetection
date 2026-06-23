@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Create Account — Crop Disease AI | Nepal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* ========== ROOT & GLOBAL ========== */
+    :root {
+      --green-dark: #0f2b14;
+      --green-primary: #2c6e2f;
+      --green-light: #4c9a4a;
+      --cream-bg: #FDF9F0;
+      --sand: #e9e0d3;
+      --stone: #5e4b3c;
+      --gray-soft: #f5f2ec;
+      --shadow-sm: 0 8px 20px rgba(0,0,0,0.03), 0 2px 6px rgba(0,0,0,0.05);
+      --transition: all 0.2s ease;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--cream-bg);
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      color: #2b2a27;
+      position: relative;
+    }
+    body.np-font {
+      font-family: 'Noto Sans Devanagari', sans-serif;
+    }
+    
+    /* Language Toggle - Top Right Corner */
+    .lang-switch {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: white;
+      border-radius: 60px;
+      padding: 8px 18px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+      z-index: 1000;
+      border: 1px solid #dad1c4;
+      backdrop-filter: blur(4px);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+    .lang-switch:hover {
+      background: #f5f0e6;
+      transform: translateY(-1px);
+    }
+    .lang-switch svg {
+      width: 16px;
+      height: 16px;
+      color: var(--green-primary);
+    }
+    
+    /* LEFT PANEL */
+    .panel-left {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      background: url('https://images.pexels.com/photos/28589186/pexels-photo-28589186.jpeg?auto=compress&cs=tinysrgb&w=1600&h=900&dpr=1') center/cover no-repeat;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 2.5rem;
+      box-shadow: 4px 0 25px rgba(0,0,0,0.08);
+      position: relative;
+      background-position: 30% center;
+    }
+    .panel-left::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(125deg, rgba(20, 45, 18, 0.35) 0%, rgba(15, 31, 12, 0.75) 85%);
+      backdrop-filter: brightness(1.02);
+    }
+    .left-content {
+      position: relative;
+      z-index: 2;
+      margin-bottom: 2rem;
+    }
+    .brand-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,240,0.18);
+      backdrop-filter: blur(3px);
+      border: 1px solid rgba(255,255,210,0.35);
+      border-radius: 60px;
+      padding: 5px 16px;
+      margin-bottom: 1.8rem;
+      width: fit-content;
+    }
+    .brand-tag span {
+      font-size: 0.7rem;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      color: #FFF8E7;
+    }
+    .left-headline {
+      font-size: clamp(1.8rem, 3.5vw, 2.9rem);
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.25;
+      margin-bottom: 1.2rem;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    .left-headline em {
+      font-style: italic;
+      color: #c0f0a0;
+      font-weight: 700;
+    }
+    .left-sub {
+      font-size: 0.9rem;
+      color: rgba(255,250,225,0.85);
+      line-height: 1.6;
+      max-width: 360px;
+      margin-bottom: 1.8rem;
+      font-weight: 400;
+    }
+    .feat-pill {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(40,40,25,0.25);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,245,200,0.3);
+      border-radius: 18px;
+      padding: 12px 20px;
+      margin-bottom: 14px;
+      width: 100%;
+      max-width: 340px;
+      transition: transform 0.2s;
+    }
+    .feat-pill:hover {
+      transform: translateX(4px);
+      background: rgba(60,60,35,0.3);
+    }
+    .feat-pill-icon {
+      width: 38px;
+      height: 38px;
+      background: rgba(125, 175, 91, 0.4);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .feat-pill-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: #e9ffdb;
+      stroke-width: 1.5;
+      fill: none;
+    }
+    .feat-pill-txt {
+      flex: 1;
+    }
+    .feat-pill-txt strong {
+      font-size: 0.9rem;
+      color: white;
+      font-weight: 700;
+      display: block;
+      margin-bottom: 6px;
+      letter-spacing: -0.2px;
+    }
+    .feat-pill-txt span {
+      font-size: 0.72rem;
+      color: #e8dfc8;
+      line-height: 1.4;
+      display: block;
+    }
+
+    /* RIGHT PANEL */
+    .panel-right {
+      background: var(--cream-bg);
+      overflow-y: auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 3rem 1.8rem 2rem 1.8rem;
+      min-height: 100vh;
+    }
+    .form-shell {
+      width: 100%;
+      max-width: 500px;
+      padding-bottom: 2rem;
+      margin-top: 0.5rem;
+    }
+    .steps {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 2rem;
+      background: #fffcf4;
+      padding: 8px 16px;
+      border-radius: 100px;
+      width: fit-content;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: var(--shadow-sm);
+    }
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1ede5;
+      padding: 5px 14px;
+      border-radius: 40px;
+      transition: var(--transition);
+    }
+    .step.active {
+      background: var(--green-primary);
+      color: white;
+    }
+    .step.active .step-num, .step.active .step-lbl { color: white; }
+    .step.done .step-num { background: var(--green-light); color: white; }
+    .step-num {
+      width: 26px;
+      height: 26px;
+      background: #e3ddd2;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #5b4c3a;
+    }
+    .step-lbl {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #6f5e4c;
+    }
+    .step-line {
+      width: 28px;
+      height: 1px;
+      background: #cbc3b6;
+    }
+
+    .form-group {
+      margin-bottom: 1.3rem;
+    }
+    .form-label {
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 6px;
+      display: block;
+      color: #3e2e22;
+    }
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .ico {
+      position: absolute;
+      left: 14px;
+      color: #a2917c;
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+    .form-input {
+      width: 100%;
+      padding: 12px 42px 12px 40px;
+      border: 1px solid #e2d9cf;
+      border-radius: 18px;
+      font-size: 0.9rem;
+      background: white;
+      transition: 0.2s;
+      font-family: 'Inter', monospace;
+    }
+    .form-input:focus {
+      border-color: var(--green-primary);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(44,110,47,0.1);
+    }
+    .show-pw {
+      position: absolute;
+      right: 16px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #9b8b78;
+    }
+    .field-error {
+      font-size: 0.7rem;
+      color: #d9433a;
+      margin-top: 5px;
+      margin-left: 8px;
+    }
+    .btn {
+      padding: 12px 20px;
+      border-radius: 40px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 0.9rem;
+    }
+    .btn-primary {
+      background: var(--green-primary);
+      color: white;
+      width: 100%;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    .btn-primary:hover {
+      background: #1f5922;
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: #e7dfd3;
+      color: #3b2e23;
+    }
+    .btn-full {
+      width: 100%;
+      margin-top: 0.5rem;
+    }
+    .strength-bars {
+      display: flex;
+      gap: 6px;
+      margin: 8px 0 6px;
+    }
+    .s-bar {
+      flex: 1;
+      height: 5px;
+      background: #e2d5c5;
+      border-radius: 4px;
+      transition: 0.2s;
+    }
+    .s-bar.weak { background: #e45c3e; }
+    .s-bar.fair { background: #f7b05e; }
+    .s-bar.good { background: #86b46b; }
+    .s-bar.strong { background: #276e2c; }
+    .req-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .req-pill {
+      font-size: 0.65rem;
+      background: #f0ece4;
+      padding: 3px 10px;
+      border-radius: 30px;
+      color: #6a5a49;
+    }
+    .req-pill.met {
+      background: #ddecdb;
+      color: #2a6b2f;
+    }
+    .otp-panel {
+      display: none;
+      background: #fffcf5;
+      padding: 1rem;
+      border-radius: 32px;
+    }
+    .otp-panel.show {
+      display: block;
+      animation: fadeUp 0.25s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+    .otp-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin: 1rem 0;
+    }
+    .otp-box {
+      width: 52px;
+      height: 60px;
+      text-align: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: white;
+      border: 1px solid #dacfbf;
+      border-radius: 20px;
+      font-family: monospace;
+      color: #2c5a2a;
+    }
+    .alert {
+      padding: 12px 16px;
+      border-radius: 28px;
+      margin-bottom: 1.2rem;
+      font-size: 0.8rem;
+      display: none;
+    }
+    .alert.success {
+      background: #e5f5e1;
+      border-left: 5px solid #2c6e2f;
+      color: #1d4820;
+      display: block;
+    }
+    .alert.error {
+      background: #ffe6e4;
+      border-left: 5px solid #d9534f;
+      color: #a6241f;
+      display: block;
+    }
+    .login-link {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #7c6c5b;
+      margin-top: 2rem;
+      border-top: 1px solid #e5dbcf;
+      padding-top: 1.2rem;
+    }
+    .login-link a {
+      color: var(--green-primary);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    
+    @media(max-width: 780px) {
+      body { grid-template-columns: 1fr; }
+      .panel-left { display: none; }
+      .lang-switch { top: 12px; right: 12px; background: rgba(255,255,255,0.95); }
+      .panel-right { padding: 2rem 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Language Toggle -->
+<div class="lang-switch" id="langToggle">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/>
+    <path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/>
+  </svg>
+  <span id="langBtnText">🇳🇵 नेपाली</span>
+</div>
+
+<aside class="panel-left">
+  <div class="left-content">
+    <div class="brand-tag"><div style="width:7px;height:7px;border-radius:50%;background:#b9f28c;"></div><span data-lang-key="register_brand_text">कृषि AI — नेपाल</span></div>
+    <h2 class="left-headline" data-lang-key="register_headline_html">बाली जोगाउनुहोस् <br><em>बुद्धिमानी</em> पहिचानले</h2>
+    <p class="left-sub" data-lang-key="register_subtitle_text">तस्वीर अपलोड गर्नुहोस्, तुरुन्त रोग पत्ता लगाउनुहोस् र स्थानीय उपचार सिफारिस प्राप्त गर्नुहोस् ।</p>
+    <div class="feat-pill"><div class="feat-pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><path d="M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg></div><div class="feat-pill-txt"><strong data-lang-key="feat1_title">AI प्रणाली</strong><span data-lang-key="feat1_desc">३८+ बाली रोग पहिचान</span></div></div>
+    <div class="feat-pill"><div class="feat-pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="3,20 9,8 13,14 17,6 21,20"/><circle cx="17" cy="6" r="1.2" fill="currentColor"/></svg></div><div class="feat-pill-txt"><strong data-lang-key="feat2_title">नेपाल अनुकूल</strong><span data-lang-key="feat2_desc">स्थानीय जलवायु सुझाव</span></div></div>
+    <div class="feat-pill"><div class="feat-pill-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><div class="feat-pill-txt"><strong data-lang-key="feat3_title">इतिहास ट्र्याक</strong><span data-lang-key="feat3_desc">खेत स्वास्थ्य अनुगमन</span></div></div>
+  </div>
+</aside>
+
+<main class="panel-right">
+  <div class="form-shell">
+    <div class="steps">
+      <div class="step active" id="st1"><div class="step-num" data-lang-key="step1_num">१</div><span class="step-lbl" data-lang-key="step1_label">विवरण</span></div>
+      <div class="step-line"></div>
+      <div class="step" id="st2"><div class="step-num" data-lang-key="step2_num">२</div><span class="step-lbl" data-lang-key="step2_label">प्रमाणित</span></div>
+    </div>
+
+    <div id="alertMsg" class="alert"></div>
+
+    <!-- Registration Form -->
+    <div id="formPanel">
+      <h1 style="font-size:1.6rem;font-weight:800;color:#2b4020;margin-bottom:0.25rem;" data-lang-key="register_title">खाता बनाउनुहोस्</h1>
+      <p style="font-size:0.85rem;color:#7f6c57;margin-bottom:1.8rem;" data-lang-key="register_subtitle">नेपालको AI कृषि समुदायमा सामेल हुनुहोस्</p>
+
+      <form id="regForm" novalidate>
+        <div class="form-group">
+          <label class="form-label" data-lang-key="fullname_label">पुरा नाम</label>
+          <div class="input-wrap"><i class="fas fa-user ico"></i><input type="text" id="name" class="form-input" placeholder="e.g., Bikram Chapagain" autocomplete="name"></div>
+          <div class="field-error" id="nameErr"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-lang-key="email_register_label">इमेल ठेगाना</label>
+          <div class="input-wrap"><i class="fas fa-envelope ico"></i><input type="email" id="email" class="form-input" placeholder="farmer@example.com" autocomplete="email"></div>
+          <div class="field-error" id="emailErr"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="form-group">
+            <label class="form-label" data-lang-key="phone_label">फोन (वैकल्पिक)</label>
+            <div class="input-wrap"><i class="fas fa-phone ico"></i><input type="tel" id="phone" class="form-input" placeholder="+977" autocomplete="tel"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-lang-key="district_label">जिल्ला (वैकल्पिक)</label>
+            <div class="input-wrap"><i class="fas fa-map-marker-alt ico"></i><input type="text" id="address" class="form-input" placeholder="Kaski / Pokhara" autocomplete="address-level2"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" data-lang-key="password_register_label">पासवर्ड (अंग्रेजी अक्षर/संख्या/चिन्ह मात्र)</label>
+          <div class="input-wrap"><i class="fas fa-lock ico"></i><input type="password" id="password" class="form-input" placeholder="Min 8 characters" oninput="updateStrength(); enforceEnglishPassword()"><button type="button" class="show-pw" onclick="togglePw('password','pwEye')"><i id="pwEye" class="fas fa-eye"></i></button></div>
+          <div class="strength-bars"><div class="s-bar" id="sb1"></div><div class="s-bar" id="sb2"></div><div class="s-bar" id="sb3"></div><div class="s-bar" id="sb4"></div></div>
+          <div class="req-pills">
+            <span class="req-pill" id="r1" data-lang-key="req_8chars">८+ वर्ण</span>
+            <span class="req-pill" id="r2" data-lang-key="req_upper">ठूलो अक्षर</span>
+            <span class="req-pill" id="r3" data-lang-key="req_lower">सानो अक्षर</span>
+            <span class="req-pill" id="r4" data-lang-key="req_number">संख्या</span>
+            <span class="req-pill" id="r5" data-lang-key="req_special">विशेष चिन्ह</span>
+          </div>
+          <div class="field-error" id="pwErr"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-lang-key="confirm_password_label">पासवर्ड पुष्टि गर्नुहोस्</label>
+          <div class="input-wrap"><i class="fas fa-check-circle ico"></i><input type="password" id="cfPw" class="form-input" placeholder="Repeat your password" oninput="checkConfirm()"><button type="button" class="show-pw" onclick="togglePw('cfPw','cfEye')"><i id="cfEye" class="fas fa-eye"></i></button></div>
+          <div class="field-error" id="cfErr"></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" id="submitBtn">
+          <span data-lang-key="register_button">खाता बनाउनुहोस्</span> <i class="fas fa-arrow-right"></i>
+        </button>
+      </form>
+    </div>
+
+    <!-- OTP Panel -->
+    <div id="otpPanel" class="otp-panel">
+      <div style="text-align:center;margin-bottom:0.5rem;"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--green-primary)" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg></div>
+      <h2 style="text-align:center;font-size:1.3rem;font-weight:700;" data-lang-key="otp_title">तपाईंको इनबक्स जाँच गर्नुहोस्</h2>
+      <p style="text-align:center;color:#7a6a58;font-size:.88rem;margin:0.2rem 0 1.2rem;" data-lang-key="otp_desc">हामीले ६ अंकको कोड पठाएका छौं <br><strong id="otpEmailDisplay"></strong></p>
+      <div class="otp-group" id="otpGroup">
+        <input type="text" class="otp-box" maxlength="1" inputmode="numeric"><input type="text" class="otp-box" maxlength="1" inputmode="numeric"><input type="text" class="otp-box" maxlength="1" inputmode="numeric"><input type="text" class="otp-box" maxlength="1" inputmode="numeric"><input type="text" class="otp-box" maxlength="1" inputmode="numeric"><input type="text" class="otp-box" maxlength="1" inputmode="numeric">
+      </div>
+      <div class="field-error" id="otpErr" style="text-align:center;"></div>
+      <div id="timerTxt" style="text-align:center;font-size:.8rem;margin:.3rem 0;"></div>
+      <button class="btn btn-primary btn-full" id="verifyBtn" data-lang-key="verify_btn">इमेल प्रमाणित गर्नुहोस्</button>
+      <button class="btn btn-secondary btn-full" id="resendBtn" style="margin-top:8px;" data-lang-key="resend_btn">कोड पुन: पठाउनुहोस्</button>
+    </div>
+    <div class="login-link"><span data-lang-key="already_have_account">पहिले देखि खाता छ?</span> <a href="/login" data-lang-key="login_link">साइन इन →</a></div>
+  </div>
+</main>
+
+<script src="/statics/js/shared.js"></script>
+
+<script>
+  // Page-specific password helpers
+  function togglePw(fId, iId) {
+    const f = document.getElementById(fId), i = document.getElementById(iId);
+    if (f.type === 'password') { f.type = 'text'; i.className = 'fas fa-eye-slash'; }
+    else { f.type = 'password'; i.className = 'fas fa-eye'; }
+  }
+
+  function pwChecks(pw) {
+    return { len: pw.length >= 8, up: /[A-Z]/.test(pw), lo: /[a-z]/.test(pw), num: /[0-9]/.test(pw), sp: /[!@#$%^&*()\-_=+[\]{};:'",.<>/?\\|`~]/.test(pw) };
+  }
+  
+  function updateStrength() {
+    const pw = document.getElementById('password').value;
+    const c = pwChecks(pw);
+    const sc = Object.values(c).filter(Boolean).length;
+    const bars = ['sb1','sb2','sb3','sb4'];
+    bars.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (i < sc) {
+        if (sc <= 2) el.className = 's-bar weak';
+        else if (sc === 3) el.className = 's-bar fair';
+        else if (sc === 4) el.className = 's-bar good';
+        else if (sc === 5) el.className = 's-bar strong';
+      } else el.className = 's-bar';
+    });
+    [['r1',c.len],['r2',c.up],['r3',c.lo],['r4',c.num],['r5',c.sp]].forEach(([id,v]) => document.getElementById(id).classList.toggle('met', v));
+    return sc === 5;
+  }
+  
+  function enforceEnglishPassword() {
+    const pwField = document.getElementById('password');
+    let val = pwField.value;
+    const allowedRegex = /^[A-Za-z0-9!@#$%^&*()_\-+=\[\]{};:'",.<>/?\\|`~ ]*$/;
+    if (!allowedRegex.test(val)) {
+      const newVal = val.replace(/[^\x00-\x7F]/g, '');
+      pwField.value = newVal;
+      if(newVal !== val) {
+        const isEn = window.LangManager && window.LangManager.currentLang === 'en';
+        showAlertMessage(isEn ? 'Password uses only English letters, numbers & symbols' : 'पासवर्डमा अंग्रेजी अक्षर/संख्या/चिन्ह मात्र', 'error');
+      }
+    }
+    updateStrength();
+  }
+  
+  function checkConfirm() {
+    const p = document.getElementById('password').value, c = document.getElementById('cfPw').value;
+    const isEn = window.LangManager && window.LangManager.currentLang === 'en';
+    document.getElementById('cfErr').innerText = (c && p !== c) ? (isEn ? 'Passwords do not match' : 'पासवर्ड मेल खादैनन्') : '';
+  }
+
+  function showAlertMessage(msg, type) {
+    const c = document.getElementById('alertMsg');
+    c.className = `alert ${type}`;
+    c.innerText = msg;
+    c.style.display = 'block';
+    setTimeout(() => { if(c) c.style.display = 'none'; }, 3500);
+  }
+
+  const digits = Array.from(document.querySelectorAll('.otp-box'));
+  digits.forEach((d, i) => {
+    d.addEventListener('input', e => { let v = e.target.value.replace(/\D/g,''); e.target.value = v; if (v && i < digits.length-1) digits[i+1].focus(); });
+    d.addEventListener('keydown', e => { if (e.key === 'Backspace' && !d.value && i>0) digits[i-1].focus(); });
+    d.addEventListener('paste', e => { e.preventDefault(); let paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,''); paste.split('').forEach((ch, idx) => { if (digits[i+idx]) digits[i+idx].value = ch; }); });
+  });
+
+  let curEmail = '', timerInt = null, timeLeft = 300;
+  
+  function startTimer() {
+    clearInterval(timerInt); timeLeft = 300;
+    const el = document.getElementById('timerTxt');
+    const verifyBtn = document.getElementById('verifyBtn');
+    if(verifyBtn) verifyBtn.disabled = false;
+    const tick = () => {
+      const m = Math.floor(timeLeft/60), s = timeLeft%60;
+      const isEn = window.LangManager && window.LangManager.currentLang === 'en';
+      el.innerText = isEn ? `Code expires in ${m}:${String(s).padStart(2,'0')}` : `कोडको म्याद ${m}:${String(s).padStart(2,'0')} मा सकिन्छ`;
+      if (timeLeft-- <= 0) { clearInterval(timerInt); el.innerText = isEn ? 'Code expired — resend.' : 'कोड सकियो — पुन: पठाउनुहोस्'; if(verifyBtn) verifyBtn.disabled = true; }
+    };
+    tick(); timerInt = setInterval(tick,1000);
+  }
+
+  function showOtp(email) {
+    curEmail = email;
+    document.getElementById('otpEmailDisplay').innerText = email;
+    document.getElementById('formPanel').style.display = 'none';
+    document.getElementById('otpPanel').classList.add('show');
+    document.getElementById('st1').classList.remove('active'); document.getElementById('st1').classList.add('done');
+    document.getElementById('st2').classList.add('active');
+    if(digits[0]) digits[0].focus();
+    startTimer();
+  }
+
+  // Form submission
+  document.getElementById('regForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('name').value.trim(), email = document.getElementById('email').value.trim().toLowerCase();
+    const phone = document.getElementById('phone').value.trim(), address = document.getElementById('address').value.trim();
+    const password = document.getElementById('password').value, cfPw = document.getElementById('cfPw').value;
+    const isEn = window.LangManager && window.LangManager.currentLang === 'en';
+    
+    ['nameErr','emailErr','pwErr','cfErr'].forEach(id => document.getElementById(id).innerText = '');
+    
+    if (name.length < 2) { document.getElementById('nameErr').innerText = isEn ? 'Full name required (min 2 chars)' : 'पुरा नाम चाहिन्छ (कम्तीमा २ अक्षर)'; return; }
+    if (!/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/.test(email)) { document.getElementById('emailErr').innerText = isEn ? 'Valid email required' : 'मान्य इमेल आवश्यक छ'; return; }
+    if (!updateStrength()) { document.getElementById('pwErr').innerText = isEn ? 'Password does not meet requirements' : 'पासवर्ड आवश्यकताहरू पूरा गर्दैन'; return; }
+    if (password !== cfPw) { document.getElementById('cfErr').innerText = isEn ? 'Passwords do not match' : 'पासवर्ड मेल खादैनन्'; return; }
+
+    const btn = document.getElementById('submitBtn'), submitSpan = btn.querySelector('span');
+    btn.disabled = true; submitSpan.innerText = isEn ? 'Creating account…' : 'खाता बनाउँदै...';
+    try {
+      const res = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,email,phone,address,password}) });
+      const d = await res.json();
+      if (res.ok) { showOtp(email); showAlertMessage(d.message || (isEn ? 'Verification code sent' : 'प्रमाणिकरण कोड पठाइयो'), 'success'); }
+      else { showAlertMessage(d.error || (isEn ? 'Registration failed' : 'दर्ता असफल'), 'error'); btn.disabled = false; submitSpan.innerText = isEn ? 'Create account' : 'खाता बनाउनुहोस्'; }
+    } catch(err) { showAlertMessage(isEn ? 'Server unreachable' : 'सर्भर पहुँच बाहिर', 'error'); btn.disabled = false; submitSpan.innerText = isEn ? 'Create account' : 'खाता बनाउनुहोस्'; }
+  });
+
+  document.getElementById('verifyBtn').onclick = async () => {
+    const code = digits.map(d => d.value).join('');
+    const isEn = window.LangManager && window.LangManager.currentLang === 'en';
+    if (code.length !== 6) { document.getElementById('otpErr').innerText = isEn ? 'Enter all 6 digits' : 'सबै ६ अंक राख्नुहोस्'; return; }
+    document.getElementById('otpErr').innerText = '';
+    try {
+      const res = await fetch('/api/auth/verify-email', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:curEmail, otp:code}) });
+      const d = await res.json();
+      if (res.ok) { showAlertMessage(d.message, 'success'); clearInterval(timerInt); setTimeout(() => window.location.href='/login',1800); }
+      else showAlertMessage(d.error || (isEn ? 'Verification failed' : 'प्रमाणिकरण असफल'), 'error');
+    } catch { showAlertMessage(isEn ? 'Network error' : 'नेटवर्क त्रुटि', 'error'); }
+  };
+
+  document.getElementById('resendBtn').onclick = async () => {
+    const isEn = window.LangManager && window.LangManager.currentLang === 'en';
+    try {
+      const res = await fetch('/api/auth/resend-verification', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:curEmail}) });
+      const d = await res.json();
+      if (res.ok) { showAlertMessage(d.message, 'success'); digits.forEach(d=>d.value=''); digits[0].focus(); startTimer(); }
+      else showAlertMessage(d.error || (isEn ? 'Resend failed' : 'पुन: पठाउन असफल'), 'error');
+    } catch { showAlertMessage(isEn ? 'Network error' : 'नेटवर्क त्रुटि', 'error'); }
+  };
+
+  document.getElementById('password').addEventListener('input', enforceEnglishPassword);
+
+  // Language toggle
+  document.getElementById('langToggle').addEventListener('click', () => {
+    if (typeof window.LangManager !== 'undefined') {
+      const newLang = window.LangManager.currentLang === 'en' ? 'np' : 'en';
+      window.LangManager.setLanguage(newLang);
+    }
+  });
+
+  // Update language button text
+  function updateLangButtonText() {
+    const btnText = document.getElementById('langBtnText');
+    if (btnText && typeof window.LangManager !== 'undefined') {
+      btnText.innerText = window.LangManager.currentLang === 'en' ? '🇳🇵 नेपाली' : '🇬🇧 English';
+    }
+  }
+
+  // Initialize page
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof window.LangManager !== 'undefined') {
+      setTimeout(() => {
+        updateLangButtonText();
+        const otpEmailDisplay = document.getElementById('otpEmailDisplay');
+        if (otpEmailDisplay && curEmail) {
+          otpEmailDisplay.innerText = curEmail;
+        }
+      }, 150);
+      // shared.js dispatches 'langApplied' (not 'languageChanged') — that
+      // event name doesn't exist anywhere in shared.js, so this listener
+      // was previously dead code and the button text never updated after
+      // the first load. Same bug found and fixed in user-dashboard.html.
+      window.addEventListener('langApplied', updateLangButtonText);
+    } else {
+      console.error('shared.js not loaded! Check path: /statics/js/shared.js');
+    }
+  });
+</script>
+</body>
+</html>

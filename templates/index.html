@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crop Disease AI — Nepal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --g1: #1a3d1c; --g2: #2C5F2D; --g3: #4a8c4c;
+      --bg: #f5f0e8; --surf: #ffffff; --border: #ddd5c8;
+      --tx: #1a2b1a; --txd: #5a6b5a; --txm: #8a9e8a;
+      --r: 14px; --rmd: 10px;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tx); min-height: 100vh; }
+    body.np-font { font-family: 'Noto Sans Devanagari', sans-serif; }
+
+    /* NAV */
+    .nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .9rem 2rem; background: rgba(245,240,232,.92); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px); position: sticky; top: 0; z-index: 100;
+      gap: .75rem; flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1rem; color: var(--g2); text-decoration: none; }
+    .brand svg { width: 26px; height: 26px; flex-shrink: 0; }
+    .nav-r { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    /* LANGUAGE TOGGLE */
+    .lang-toggle { display: flex; background: rgba(0,0,0,.05); border: 1px solid var(--border); border-radius: 999px; padding: 3px; gap: 2px; }
+    .lang-toggle button {
+      padding: 4px 13px; border-radius: 999px; border: none; cursor: pointer;
+      font-size: .72rem; font-weight: 700; background: transparent; color: var(--txd);
+      transition: all .2s; font-family: inherit;
+    }
+    .lang-toggle button.active { background: var(--g2); color: #fff; box-shadow: 0 2px 8px rgba(44,95,45,.3); }
+    .lang-toggle button:hover:not(.active) { background: rgba(0,0,0,.06); color: var(--tx); }
+
+    .btn { padding: 7px 16px; border-radius: var(--rmd); font-weight: 700; font-size: .8rem; cursor: pointer; transition: all .2s; border: none; font-family: inherit; text-decoration: none; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-out { background: transparent; color: var(--g2); border: 1.5px solid var(--g2); }
+    .btn-out:hover { background: var(--g2); color: #fff; }
+    .btn-fill { background: var(--g2); color: #fff; }
+    .btn-fill:hover { background: #1e4a20; }
+
+    /* HERO */
+    .hero-body { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 5rem 1.5rem 3rem; }
+    .hero-tag { display: inline-flex; align-items: center; gap: 7px; background: rgba(44,95,45,.1); border: 1px solid rgba(44,95,45,.2); border-radius: 999px; padding: 5px 15px; font-size: .7rem; font-weight: 700; color: var(--g2); margin-bottom: 1.5rem; }
+    .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #4ade80; animation: pulse 2s ease infinite; }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(74,222,128,.4); } 50% { box-shadow: 0 0 0 5px rgba(74,222,128,0); } }
+    h1.hero-h1 { font-size: clamp(2rem, 5vw, 3.8rem); font-weight: 800; line-height: 1.12; letter-spacing: -.03em; margin-bottom: 1.1rem; }
+    h1.hero-h1 .accent { background: linear-gradient(135deg, var(--g1), var(--g3)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero-sub { font-size: .92rem; color: var(--txd); max-width: 480px; line-height: 1.8; margin-bottom: 2rem; }
+    .ctas { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 3rem; }
+    .btn-hero { padding: 12px 26px; border-radius: var(--rmd); font-weight: 700; font-size: .9rem; cursor: pointer; transition: all .2s; display: inline-flex; align-items: center; gap: 8px; font-family: inherit; text-decoration: none; }
+    .btn-hf { background: var(--g2); color: #fff; border: none; }
+    .btn-hf:hover { background: #1e4a20; transform: translateY(-2px); box-shadow: 0 12px 28px rgba(44,95,45,.4); }
+    .btn-ho { background: transparent; color: var(--g2); border: 1.5px solid var(--g2); }
+    .btn-ho:hover { background: var(--g2); color: #fff; }
+
+    /* STATS */
+    .stats-row { display: flex; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 0 4px 20px rgba(0,0,0,.07); max-width: 580px; width: 100%; }
+    .stat { flex: 1; text-align: center; padding: 1rem .5rem; border-right: 1px solid var(--border); }
+    .stat:last-child { border-right: none; }
+    .sn { font-size: 1.35rem; font-weight: 800; color: var(--g2); display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .sn svg { width: 22px; height: 22px; }
+    .sl { font-size: .65rem; color: var(--txm); margin-top: .25rem; text-transform: uppercase; font-weight: 500; letter-spacing: .02em; }
+
+    /* FEATURES */
+    .feats { padding: 0 1.5rem 4rem; max-width: 1000px; margin: 2.5rem auto 0; width: 100%; }
+    .sec-lbl { text-align: center; font-size: .68rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--g2); margin-bottom: 1.5rem; }
+    .fg { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1rem; }
+    .fc { background: #fff; border: 1px solid var(--border); border-radius: var(--r); padding: 1.5rem; transition: all .2s; }
+    .fc:hover { border-color: rgba(44,95,45,.3); transform: translateY(-3px); box-shadow: 0 10px 28px rgba(44,95,45,.12); }
+    .fi { width: 40px; height: 40px; border-radius: 10px; background: rgba(44,95,45,.08); display: flex; align-items: center; justify-content: center; margin-bottom: .9rem; }
+    .fi svg { width: 22px; height: 22px; stroke: var(--g2); stroke-width: 1.8; fill: none; }
+    .fc h3 { font-size: .88rem; font-weight: 700; margin-bottom: .35rem; }
+    .fc p { font-size: .78rem; color: var(--txd); line-height: 1.7; }
+
+    .status-bar { text-align: center; padding: .75rem; background: #ede8de; border-top: 1px solid var(--border); font-size: .72rem; color: var(--txm); }
+
+    @media (max-width: 600px) {
+      .nav { padding: .8rem 1rem; }
+      .hero-body { padding: 3.5rem 1rem 2.5rem; }
+      .stat { padding: .85rem .4rem; }
+      .sn { font-size: 1.1rem; }
+      .sn svg { width: 18px; height: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="/" class="brand">
+    <!-- Brand Logo SVG -->
+    <svg viewBox="0 0 32 32" fill="none">
+      <path d="M16 28C16 28 6 22 6 13C6 8 10.48 4 16 4C21.52 4 26 8 26 13C26 22 16 28 16 28Z" fill="#2C5F2D" opacity=".9"/>
+      <path d="M16 28C16 28 6 22 6 13C6 8 10.48 4 16 4" fill="#6dbf67" opacity=".5"/>
+      <line x1="16" y1="14" x2="16" y2="28" stroke="#a3e890" stroke-width="1.5"/>
+      <line x1="16" y1="18" x2="12" y2="15" stroke="#a3e890" stroke-width="1.2"/>
+      <line x1="16" y1="21" x2="20" y2="18" stroke="#a3e890" stroke-width="1.2"/>
+    </svg>
+    <span data-lang-key="brand">CropDisease AI</span>
+  </a>
+  <div class="nav-r">
+    <div class="lang-toggle">
+      <button data-lang-btn="en" onclick="setLanguage('en')">EN</button>
+      <button data-lang-btn="np" onclick="setLanguage('np')">नेपाली</button>
+    </div>
+    <a href="/login" class="btn btn-out" data-lang-key="nav_login">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+        <polyline points="10 17 15 12 10 7"/>
+        <line x1="15" y1="12" x2="3" y2="12"/>
+      </svg>
+      Login
+    </a>
+    <a href="/register" class="btn btn-fill" data-lang-key="nav_register">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <line x1="19" y1="8" x2="19" y2="14"/>
+        <line x1="22" y1="11" x2="16" y2="11"/>
+      </svg>
+      Get Started
+    </a>
+  </div>
+</nav>
+
+<div class="hero-body">
+  <div class="hero-tag"><span class="dot"></span><span data-lang-key="tag">AI-Powered — Nepal Agriculture</span></div>
+  <h1 class="hero-h1">
+    <span data-lang-key="h1_line1">Diagnose your crops</span><br>
+    <span data-lang-key="h1_line2">with </span><span class="accent" data-lang-key="h1_accent">AI precision</span>
+  </h1>
+  <p class="hero-sub" data-lang-key="subtitle">Upload a photo of your crop's leaves and get instant disease diagnosis, treatment recommendations, and prevention tips — tailored for Nepal's farmers.</p>
+  <div class="ctas">
+    <a href="/register" class="btn-hero btn-hf">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 22V12"/>
+        <path d="M12 12C12 7 7 4 3 5c0 5 3 8 9 7"/>
+        <path d="M12 12c0-5 5-8 9-7 0 5-3 8-9 7"/>
+      </svg>
+      <span data-lang-key="cta_start">Start for Free</span>
+    </a>
+    <a href="/login" class="btn-hero btn-ho">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+        <polyline points="10 17 15 12 10 7"/>
+        <line x1="15" y1="12" x2="3" y2="12"/>
+      </svg>
+      <span data-lang-key="cta_login">Sign In</span>
+    </a>
+  </div>
+  <div class="stats-row">
+    <div class="stat">
+      <div class="sn">38+</div>
+      <div class="sl" data-lang-key="stat1">Diseases Detected</div>
+    </div>
+    <div class="stat">
+      <div class="sn">96%</div>
+      <div class="sl" data-lang-key="stat2">AI Accuracy</div>
+    </div>
+    <div class="stat">
+      <div class="sn">
+        <svg viewBox="0 0 64 36" fill="none">
+          <polygon points="0,36 20,8 32,20 44,4 56,16 64,36" fill="var(--g2)" opacity=".25"/>
+          <polygon points="20,8 32,20 44,4 56,16" fill="none" stroke="var(--g2)" stroke-width="1.8"/>
+          <circle cx="44" cy="4" r="2" fill="white" opacity=".9"/>
+        </svg>
+      </div>
+      <div class="sl" data-lang-key="stat3">Made for Nepal</div>
+    </div>
+    <div class="stat">
+      <div class="sn">Free</div>
+      <div class="sl" data-lang-key="stat4">Always Free</div>
+    </div>
+  </div>
+</div>
+
+<div class="feats">
+  <div class="sec-lbl" data-lang-key="features_title">What you get</div>
+  <div class="fg">
+    <div class="fc">
+      <div class="fi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M12 3v3M12 18v3M3 12h3M18 12h3"/>
+          <path d="M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/>
+        </svg>
+      </div>
+      <h3 data-lang-key="feat1_title">AI-Powered Detection</h3>
+      <p data-lang-key="feat1_desc">EfficientNet-B3 deep learning model trained on 38+ plant diseases with up to 96% accuracy.</p>
+    </div>
+    <div class="fc">
+      <div class="fi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M3 9h18"/>
+          <path d="M8 9V5a4 4 0 0 1 8 0v4"/>
+          <rect x="3" y="9" width="18" height="11" rx="2"/>
+          <line x1="12" y1="13" x2="12" y2="17"/>
+          <line x1="10" y1="15" x2="14" y2="15"/>
+        </svg>
+      </div>
+      <h3 data-lang-key="feat2_title">Treatment Guidance</h3>
+      <p data-lang-key="feat2_desc">Organic and chemical treatment recommendations, medicine dosages, and prevention tips.</p>
+    </div>
+    <div class="fc">
+      <div class="fi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+      </div>
+      <h3 data-lang-key="feat3_title">Scan History</h3>
+      <p data-lang-key="feat3_desc">Track your field's health over time. View past diagnoses and monitor disease patterns.</p>
+    </div>
+    <div class="fc">
+      <div class="fi">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <polygon points="3,20 9,8 13,14 17,6 21,20"/>
+          <circle cx="17" cy="6" r="1.2" fill="var(--g2)"/>
+        </svg>
+      </div>
+      <h3 data-lang-key="feat4_title">Nepal-Localised</h3>
+      <p data-lang-key="feat4_desc">Built for Nepali farmers with region-specific advice and locally available medicines.</p>
+    </div>
+  </div>
+</div>
+
+<div class="status-bar">
+  <span class="dot" style="margin-right:5px"></span>
+  <span data-lang-key="api_status">API Status:</span>
+  <span id="apiStatus">Checking…</span>
+</div>
+
+<script src="/statics/js/shared.js"></script>
+
+<script>
+  function t(key) {
+    return window.LangManager ? window.LangManager.get(key) : key;
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (typeof window.LangManager === 'undefined') {
+      console.error('shared.js not loaded! Check path: /statics/js/shared.js');
+    } else {
+      console.log('shared.js loaded successfully!');
+    }
+
+    try {
+      const res = await fetch('/api/health');
+      const d = await res.json();
+      const statusSpan = document.getElementById('apiStatus');
+      if (statusSpan && window.LangManager) {
+        const isOnline = d.status === 'healthy';
+        statusSpan.textContent = isOnline ? window.LangManager.get('online') : window.LangManager.get('offline');
+      }
+    } catch (err) {
+      const statusSpan = document.getElementById('apiStatus');
+      if (statusSpan && window.LangManager) {
+        statusSpan.textContent = window.LangManager.get('offline');
+      }
+    }
+  });
+
+  window.addEventListener('langApplied', async () => {
+    try {
+      const res = await fetch('/api/health');
+      const d = await res.json();
+      const statusSpan = document.getElementById('apiStatus');
+      if (statusSpan && window.LangManager) {
+        const isOnline = d.status === 'healthy';
+        statusSpan.textContent = isOnline ? window.LangManager.get('online') : window.LangManager.get('offline');
+      }
+    } catch {
+      const statusSpan = document.getElementById('apiStatus');
+      if (statusSpan && window.LangManager) {
+        statusSpan.textContent = window.LangManager.get('offline');
+      }
+    }
+  });
+</script>
+</body>
+</html>

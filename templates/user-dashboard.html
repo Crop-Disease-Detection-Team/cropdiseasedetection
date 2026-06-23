@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Dashboard — Crop Disease AI | Nepal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+  <style>
+    /* ========== SAME COLORS AS REGISTER/LOGIN ========== */
+    :root {
+      --green-dark: #0f2b14;
+      --green-primary: #2c6e2f;
+      --green-light: #4c9a4a;
+      --cream-bg: #FDF9F0;
+      --sand: #e9e0d3;
+      --stone: #5e4b3c;
+      --gray-soft: #f5f2ec;
+      --shadow-sm: 0 8px 20px rgba(0,0,0,0.03), 0 2px 6px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+      --transition: all 0.2s ease;
+      --radius-xl: 24px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--cream-bg);
+      color: var(--stone);
+      min-height: 100vh;
+    }
+    
+    body.np-font { font-family: 'Noto Sans Devanagari', sans-serif; }
+    
+    .lang-switch-inline {
+      background: var(--gray-soft);
+      border-radius: 60px;
+      padding: 6px 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border: 1px solid var(--sand);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      color: var(--stone);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .lang-switch-inline:hover { background: var(--sand); }
+    .lang-switch-inline svg { width: 14px; height: 14px; color: var(--green-primary); flex-shrink: 0; }
+    
+    /* Navbar */
+    .navbar {
+      background: white;
+      padding: 0.7rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--sand);
+      position: sticky;
+      top: 0;
+      z-index: 99;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .navbar-left {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    
+    .logo {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--green-primary);
+    }
+    
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+    
+    .nav-links a {
+      color: var(--stone);
+      text-decoration: none;
+      font-weight: 500;
+      transition: var(--transition);
+      font-size: 0.85rem;
+    }
+    
+    .nav-links a:hover { color: var(--green-primary); }
+    .nav-links a.active { color: var(--green-primary); font-weight: 700; }
+    
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      flex-shrink: 0;
+      flex-wrap: nowrap;
+    }
+    
+    .nav-avatar {
+      width: 36px;
+      height: 36px;
+      min-width: 36px;
+      border-radius: 50%;
+      background: var(--green-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 0.85rem;
+      overflow: hidden;
+      flex-shrink: 0;
+      /* No cursor pointer – static display only */
+    }
+    
+    .nav-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .nav-avatar .avatar-initials {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      background: var(--green-primary);
+      color: white;
+      font-weight: 700;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+    }
+    
+    .menu-container {
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    .hamburger-btn {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: var(--stone);
+      padding: 4px 6px;
+      flex-shrink: 0;
+    }
+    
+    .hamburger-btn:hover { color: var(--green-primary); }
+    
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background: white;
+      border: 1px solid var(--sand);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      min-width: 190px;
+      padding: 0.4rem 0;
+      margin-top: 0.5rem;
+      z-index: 100;
+    }
+    
+    .dropdown-menu.show { display: block; }
+    
+    .dropdown-item {
+      padding: 0.5rem 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.82rem;
+      transition: var(--transition);
+      color: var(--stone);
+    }
+    
+    .dropdown-item:hover { background: var(--gray-soft); color: var(--green-primary); }
+    .dropdown-item i { width: 18px; font-size: 0.85rem; }
+    
+    /* Container */
+    .container { max-width: 1200px; margin: 1.5rem auto; padding: 0 1.5rem; }
+    
+    /* Welcome */
+    .welcome {
+      padding: 1.5rem 0 0.5rem;
+    }
+    .welcome h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--green-primary);
+    }
+    .welcome p {
+      color: var(--stone);
+      font-size: 0.9rem;
+      margin-top: 0.2rem;
+      opacity: 0.7;
+    }
+    
+    /* Stats Grid */
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin: 1.25rem 0 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: var(--radius-md);
+      padding: 1rem 1.2rem;
+      border: 1px solid var(--sand);
+      box-shadow: var(--shadow-sm);
+      transition: var(--transition);
+    }
+    
+    .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    
+    .stat-number {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--green-primary);
+    }
+    
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--stone);
+      opacity: 0.7;
+      margin-top: 0.2rem;
+    }
+    
+    .stat-label i {
+      margin-right: 5px;
+      color: var(--green-primary);
+      opacity: 0.5;
+    }
+    
+    /* Two Column */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 1.5rem;
+    }
+    
+    .card {
+      background: white;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--sand);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    
+    .card-header {
+      padding: 0.8rem 1.2rem;
+      background: var(--green-primary);
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .card-header span {
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    
+    .card-header a {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+    }
+    
+    .card-header a:hover { color: white; text-decoration: underline; }
+    
+    .card-body {
+      padding: 0.8rem 1.2rem;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    /* Scan Row */
+    .scan-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--sand);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    
+    .scan-row:hover { background: var(--gray-soft); border-radius: var(--radius-sm); padding-left: 0.4rem; }
+    .scan-row:last-child { border-bottom: none; }
+    
+    .scan-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      background: var(--gray-soft);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--green-primary);
+      flex-shrink: 0;
+    }
+    
+    .scan-info { flex: 1; min-width: 0; }
+    .scan-name { font-weight: 600; font-size: 0.82rem; }
+    .scan-date { font-size: 0.68rem; color: var(--stone); opacity: 0.6; }
+    
+    .scan-confidence {
+      font-weight: 700;
+      font-size: 0.8rem;
+    }
+    .scan-confidence.high { color: var(--green-primary); }
+    .scan-confidence.medium { color: #d97706; }
+    .scan-confidence.low { color: #dc2626; }
+    
+    .severity-badge {
+      font-size: 0.6rem;
+      padding: 2px 8px;
+      border-radius: 50px;
+      font-weight: 600;
+    }
+    .severity-badge.high { background: #fef2f2; color: #991b1b; }
+    .severity-badge.medium { background: #fefce8; color: #854d0e; }
+    .severity-badge.low { background: #f0fdf4; color: #166534; }
+    
+    /* Disease Library */
+    .lib-filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    
+    .lib-filters input,
+    .lib-filters select {
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1px solid var(--sand);
+      font-size: 0.78rem;
+      outline: none;
+      background: white;
+    }
+    
+    .lib-filters input:focus,
+    .lib-filters select:focus { border-color: var(--green-primary); }
+    
+    .disease-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      padding: 0.4rem 0;
+    }
+    
+    .disease-card {
+      background: var(--gray-soft);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      cursor: pointer;
+      transition: var(--transition);
+      border: 1px solid transparent;
+    }
+    
+    .disease-card:hover { border-color: var(--green-primary); transform: translateY(-2px); }
+    
+    .disease-img {
+      width: 100%;
+      height: 90px;
+      object-fit: cover;
+      background: #e8e4dc;
+    }
+    
+    .disease-info { padding: 0.4rem 0.6rem; }
+    .disease-name { font-weight: 600; font-size: 0.78rem; }
+    .disease-crop { font-size: 0.65rem; color: var(--stone); opacity: 0.6; }
+    .disease-badge { margin-top: 0.2rem; }
+    
+    /* Pagination */
+    .pagination {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      padding: 0.4rem 0;
+      flex-wrap: wrap;
+    }
+    
+    .page-btn {
+      padding: 3px 8px;
+      border: 1px solid var(--sand);
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+      font-size: 0.7rem;
+      transition: var(--transition);
+    }
+    
+    .page-btn:hover { background: var(--gray-soft); }
+    .page-btn.active { background: var(--green-primary); color: white; border-color: var(--green-primary); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 50px;
+      font-size: 0.6rem;
+      font-weight: 600;
+    }
+    .badge-critical { background: #fef2f2; color: #991b1b; }
+    .badge-high { background: #fff7ed; color: #c2410c; }
+    .badge-medium { background: #fefce8; color: #854d0e; }
+    .badge-low { background: #f0fdf4; color: #166534; }
+    .badge-info { background: #e8f0fe; color: #1a5b8d; }
+    
+    /* Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    
+    .modal.open { display: flex; }
+    
+    .modal-content {
+      background: white;
+      border-radius: var(--radius-xl);
+      max-width: 500px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 1.5rem;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .modal-header h3 { font-weight: 700; font-size: 1.1rem; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--stone); }
+    .modal-close:hover { color: var(--green-primary); }
+    
+    .detail-row {
+      display: flex;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid var(--sand);
+    }
+    
+    .detail-key { width: 90px; font-weight: 600; font-size: 0.82rem; color: var(--stone); opacity: 0.7; }
+    .detail-val { flex: 1; font-size: 0.82rem; }
+    
+    /* Loading */
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.8);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    
+    .loading-overlay.show { display: flex; }
+    
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid var(--sand);
+      border-top-color: var(--green-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* Alert */
+    .alert {
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      margin-bottom: 1rem;
+      font-size: 0.8rem;
+      display: none;
+    }
+    .alert.success { background: #e8f5e9; border-left: 4px solid var(--green-primary); color: #1e4620; display: block; }
+    .alert.error { background: #fef2f2; border-left: 4px solid #dc2626; color: #991b1b; display: block; }
+    
+    .form-group { margin-bottom: 0.8rem; }
+    .form-label { display: block; font-weight: 600; font-size: 0.8rem; margin-bottom: 4px; }
+    .input-wrap { position: relative; }
+    .ico { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--stone); opacity: 0.5; }
+    .form-input {
+      width: 100%;
+      padding: 8px 10px 8px 32px;
+      border: 1px solid var(--sand);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      outline: none;
+      transition: var(--transition);
+    }
+    .form-input:focus { border-color: var(--green-primary); box-shadow: 0 0 0 3px rgba(44,110,47,0.1); }
+    .form-textarea { padding-left: 10px; min-height: 80px; resize: vertical; }
+    
+    .btn {
+      padding: 8px 16px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      text-decoration: none;
+    }
+    
+    .btn-primary { background: var(--green-primary); color: white; }
+    .btn-primary:hover { background: #1f5922; transform: translateY(-1px); }
+    .btn-secondary { background: var(--gray-soft); color: var(--stone); }
+    .btn-secondary:hover { background: var(--sand); }
+    .btn-full { width: 100%; justify-content: center; }
+    
+    .edit-inp {
+      width: 100%;
+      padding: 6px 10px;
+      border: 1px solid var(--sand);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      outline: none;
+      transition: var(--transition);
+    }
+    
+    .edit-inp:focus { border-color: var(--green-primary); }
+    
+    @media (max-width: 900px) {
+      .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .grid-2 { grid-template-columns: 1fr; }
+      .disease-grid { grid-template-columns: 1fr 1fr; }
+    }
+    
+    @media (max-width: 720px) {
+      .lang-switch-inline span { display: none; }
+      .lang-switch-inline { padding: 6px 8px; }
+    }
+    
+    @media (max-width: 600px) {
+      .grid-4 { grid-template-columns: 1fr 1fr; }
+      .disease-grid { grid-template-columns: 1fr; }
+      .navbar { padding: 0.6rem 1rem; }
+      .container { padding: 0 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-left">
+    <div class="logo"> CropDisease AI</div>
+    <div class="nav-links">
+      <a href="/user-dashboard" class="active" data-lang-key="nav_dashboard">Dashboard</a>
+      <a href="/predict" data-lang-key="nav_detect">Detect</a>
+      <a href="/history" data-lang-key="nav_history">History</a>
+    </div>
+  </div>
+  <div class="navbar-right">
+    <div class="lang-switch-inline" id="langToggle">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/>
+        <path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/>
+      </svg>
+      <span id="langBtnText">🇳🇵 नेपाली</span>
+    </div>
+    <div class="nav-avatar" id="navAvatar">
+      <i class="fas fa-user"></i>
+    </div>
+    <div class="menu-container">
+      <button class="hamburger-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+      <div class="dropdown-menu" id="dropMenu">
+        <div class="dropdown-item" onclick="openProfile()"><i class="fas fa-user"></i> <span data-lang-key="my_profile">My Profile</span></div>
+        <div class="dropdown-item" onclick="openChangePw()"><i class="fas fa-key"></i> <span data-lang-key="change_password">Change Password</span></div>
+        <div class="dropdown-item" onclick="openFeedback()"><i class="fas fa-comment"></i> <span data-lang-key="send_feedback">Send Feedback</span></div>
+        <div class="dropdown-item" onclick="confirmDelHistory()"><i class="fas fa-trash"></i> <span data-lang-key="clear_history">Clear History</span></div>
+        <div class="dropdown-item" style="color:#dc2626;" onclick="logout()"><i class="fas fa-sign-out-alt" style="color:#dc2626;"></i> <span data-lang-key="logout">Logout</span></div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="welcome">
+    <h1 data-lang-key="dashboard_welcome">Welcome, <span id="welcomeName">Farmer</span>!</h1>
+    <p data-lang-key="dashboard_sub">Here's a snapshot of your crop health activity.</p>
+  </div>
+
+  <div id="alertMsg" class="alert"></div>
+
+  <!-- Stats -->
+  <div class="grid-4">
+    <div class="stat-card">
+      <div class="stat-number" id="statScans">0</div>
+      <div class="stat-label"><i class="fas fa-microscope"></i> <span data-lang-key="total_scans">Total Scans</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="statFavs">0</div>
+      <div class="stat-label"><i class="fas fa-heart"></i> <span data-lang-key="saved_diseases">Saved Diseases</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="statConf">—</div>
+      <div class="stat-label"><i class="fas fa-chart-bar"></i> <span data-lang-key="avg_confidence">Avg Confidence</span></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" style="font-size:0.9rem;font-weight:600;">
+        <a href="/predict" style="color:var(--green-primary);display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;font-weight:700;">
+          <i class="fas fa-camera"></i> <span data-lang-key="scan_now">Scan Now</span>
+        </a>
+      </div>
+      <div class="stat-label" data-lang-key="quick_action">Quick Action</div>
+    </div>
+  </div>
+
+  <!-- Recent Scans + Disease Library -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header">
+        <span data-lang-key="recent_scans">Recent Scans</span>
+        <a href="/history" data-lang-key="view_all">View all →</a>
+      </div>
+      <div class="card-body" id="recentScans">
+        <div style="text-align:center;padding:1.5rem;color:var(--stone);">
+          <i class="fas fa-seedling" style="font-size:1.8rem;opacity:0.3;display:block;margin-bottom:0.5rem;"></i>
+          <span data-lang-key="no_scans_yet">No scans yet.</span><br>
+          <a href="/predict" style="color:var(--green-primary);font-weight:600;font-size:0.85rem;" data-lang-key="start_detecting">Start detecting →</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <span data-lang-key="disease_library">Disease Library</span>
+        <div class="lib-filters">
+          <input type="text" id="libSearch" data-lang-placeholder="search_diseases" placeholder="Search…" oninput="filterLib()">
+          <select id="libCrop" onchange="filterLib()">
+            <option value="" data-lang-key="all_crops">All Crops</option>
+          </select>
+        </div>
+      </div>
+      <div class="card-body" style="max-height:500px;overflow-y:auto;">
+        <div id="diseaseGrid" class="disease-grid">
+          <p style="grid-column:1/-1;color:var(--stone);text-align:center;padding:1.5rem;font-size:0.85rem;opacity:0.6;" data-lang-key="loading">Loading…</p>
+        </div>
+        <div id="libPagination" class="pagination"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Modal -->
+<div class="modal" id="profileModal">
+  <div class="modal-content">
+    <div class="modal-header"><h3 data-lang-key="my_profile">My Profile</h3><button class="modal-close" onclick="closeProfile()">×</button></div>
+    <div class="modal-body" id="profileBody">Loading…</div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal" id="pwModal">
+  <div class="modal-content" style="max-width:420px;">
+    <div class="modal-header"><h3 data-lang-key="change_password">Change Password</h3><button class="modal-close" onclick="closePw()">×</button></div>
+    <div class="modal-body">
+      <div id="pwAlert" class="alert"></div>
+      <div class="form-group"><label class="form-label" data-lang-key="current_password">Current Password</label><div class="input-wrap"><i class="fas fa-lock ico"></i><input type="password" class="form-input" id="curPw"></div></div>
+      <div class="form-group"><label class="form-label" data-lang-key="new_password">New Password</label><div class="input-wrap"><i class="fas fa-lock ico"></i><input type="password" class="form-input" id="newPw"></div></div>
+      <div class="form-group"><label class="form-label" data-lang-key="confirm_password">Confirm New Password</label><div class="input-wrap"><i class="fas fa-lock ico"></i><input type="password" class="form-input" id="cfmPw"></div></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="submitPwChange()"><span data-lang-key="update_password">Update Password</span></button>
+        <button class="btn btn-secondary" onclick="closePw()" data-lang-key="cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Feedback Modal -->
+<div class="modal" id="feedbackModal">
+  <div class="modal-content" style="max-width:440px;">
+    <div class="modal-header"><h3 data-lang-key="send_feedback">Send Feedback</h3><button class="modal-close" onclick="closeFeedback()">×</button></div>
+    <div class="modal-body">
+      <div id="fbAlert" class="alert"></div>
+      <div class="form-group"><label class="form-label" data-lang-key="your_message">Your Message</label><textarea class="form-input form-textarea" id="fbMsg" data-lang-placeholder="feedback_placeholder" placeholder="Share your suggestions, bugs, or ideas…" style="min-height:100px;padding-left:12px;"></textarea></div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-primary" style="flex:1;" onclick="submitFeedback()"><span data-lang-key="send">Send</span></button>
+        <button class="btn btn-secondary" onclick="closeFeedback()" data-lang-key="cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cropper Modal -->
+<div class="modal" id="cropModal">
+  <div class="modal-content" style="max-width:480px;">
+    <div class="modal-header"><h3 data-lang-key="crop_picture">Crop Profile Picture</h3><button class="modal-close" onclick="closeCropModal()">×</button></div>
+    <div class="modal-body"><img id="cropImg" style="max-width:100%;"><br><button class="btn btn-primary btn-full" style="margin-top:1rem;" onclick="doCrop()"><span data-lang-key="crop_upload">Crop & Upload</span></button></div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loader" style="display:none;"><div class="spinner"></div><div class="loading-txt" data-lang-key="loading">Loading…</div></div>
+
+<script src="/statics/js/auth.js"></script>
+<script src="/statics/js/shared.js"></script>
+<script>
+ 
+  const DISEASE_BASE_URL = '/Static';   // was '/Uploads'
+  const DISEASE_FOLDER   = '/samples';
+
+  const PROFILE_BASE_URL = '/uploads';
+  const PROFILE_FOLDER   = '/profiles';
+
+  // ---------- Helper to build a full image URL ----------
+  function buildImageUrl(path, baseUrl, folder) {
+    if (!path) return '';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    if (path.startsWith('/')) return path;
+    return baseUrl + folder + '/' + path;
+  }
+
+  function getDiseaseImageUrl(path) {
+    return buildImageUrl(path, DISEASE_BASE_URL, DISEASE_FOLDER);
+  }
+
+  function getProfileImageUrl(path) {
+    if (!path) return '';
+    // If already a full URL, add cache buster and return
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path.includes('?') ? path : path + '?t=' + new Date().getTime();
+    }
+    // If starts with /uploads, use it directly with cache buster
+    if (path.startsWith('/uploads')) {
+      return path.includes('?') ? path : path + '?t=' + new Date().getTime();
+    }
+    // If starts with /, build full URL
+    if (path.startsWith('/')) {
+      return '/uploads/profiles' + path + '?t=' + new Date().getTime();
+    }
+    // Otherwise build standard path
+    let url = PROFILE_BASE_URL + PROFILE_FOLDER + '/' + path;
+    if (!url.includes('?')) {
+      url += '?t=' + new Date().getTime();
+    }
+    return url;
+  }
+
+  // ---------- REST OF THE SCRIPT ----------
+  requireAuth('user');
+  let currentUser = null, isEdit = false, cropper = null;
+  let allDiseases = [], filtDiseases = [], libPage = 1;
+  const LIB_PER = 12;
+
+  // Language toggle
+  document.getElementById('langToggle').addEventListener('click', () => {
+    if (typeof window.LangManager !== 'undefined') {
+      const newLang = window.LangManager.currentLang === 'en' ? 'np' : 'en';
+      window.LangManager.setLanguage(newLang);
+    }
+  });
+
+  function updateLangButtonText() {
+    const btnText = document.getElementById('langBtnText');
+    if (btnText && typeof window.LangManager !== 'undefined') {
+      btnText.innerText = window.LangManager.currentLang === 'en' ? '🇳🇵 नेपाली' : '🇬🇧 English';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof window.LangManager !== 'undefined') {
+      setTimeout(updateLangButtonText, 100);
+      window.addEventListener('langApplied', () => {
+        updateLangButtonText();
+        loadRecent();
+        renderLib();
+        if (document.getElementById('profileModal').classList.contains('open')) {
+          renderProfile(isEdit);
+        }
+      });
+    }
+    init();
+  });
+
+  // Helpers
+  function esc(str) { return str ? String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : ''; }
+  function fmtDate(dateStr) {
+    if (!dateStr) return '—';
+    try { return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }); } 
+    catch { return '—'; }
+  }
+  function severityBadge(sev) {
+    const s = (sev || 'medium').toLowerCase();
+    const map = { high: 'high', medium: 'medium', low: 'low', critical: 'high' };
+    const cls = map[s] || 'medium';
+    const labelKey = { critical: 'sev_critical', high: 'sev_high', medium: 'sev_medium', low: 'sev_low' }[s] || 'sev_medium';
+    const label = t(labelKey);
+    return `<span class="severity-badge ${cls}">${esc(label)}</span>`;
+  }
+  function showAlert(id, msg, type) {
+    const c = document.getElementById(id);
+    if (!c) return;
+    c.className = `alert ${type}`;
+    c.innerText = msg;
+    c.style.display = 'block';
+    setTimeout(() => { if(c) c.style.display = 'none'; }, 4000);
+  }
+  function getToken() { return localStorage.getItem('access_token'); }
+
+  // Auth fetch
+  async function authFetch(url, options = {}) {
+    const token = getToken();
+    if (!token) { window.location.href = '/login'; throw new Error('No token'); }
+    const res = await fetch(url, {
+      ...options,
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...options.headers }
+    });
+    if (res.status === 401) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+      throw new Error('Unauthorized');
+    }
+    return res;
+  }
+
+  function logout() {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    window.location.href = '/login';
+  }
+
+  // ---------- Init ----------
+  async function init() {
+    document.getElementById('loader').style.display = 'flex';
+    try {
+      // Try to fetch user, stats, and recent scans; if one fails, continue with others
+      const results = await Promise.allSettled([fetchUser(), loadStats(), loadRecent()]);
+      const rejected = results.filter(r => r.status === 'rejected');
+      // Only show error if it's an auth issue or all three failed
+      const allFailed = rejected.length === 3;
+      const isAuthIssue = rejected.some(r => r.reason?.message === 'No token' || r.reason?.message === 'Unauthorized');
+      if (allFailed && !isAuthIssue) {
+        showAlert('alertMsg', 'Could not load dashboard data. Please refresh.', 'error');
+      }
+    } catch (e) {
+      console.warn('Init error:', e);
+    } finally {
+      document.getElementById('loader').style.display = 'none';
+    }
+    initMenu();
+    loadDiseases();
+  }
+
+  // ---------- User Info (robust avatar) ----------
+  async function fetchUser() {
+    const res = await authFetch('/api/auth/me');
+    if (!res) return;
+    const d = await res.json();
+    currentUser = d.user;
+    localStorage.setItem('user', JSON.stringify(d.user));
+    document.getElementById('welcomeName').textContent = d.user.name || t('ud_default_name');
+    setAvatarOrInitials(document.getElementById('navAvatar'), d.user);
+  }
+
+ function setAvatarOrInitials(el, user) {
+  if (!el) return;
+  if (!user) {
+    el.innerHTML = '';
+    return;
+  }
+
+  // Use profile_pic or profile_image
+  let imgUrl = user.profile_pic || user.avatar || user.profile_image || '';
+  const name = user.name || user.full_name || user.username || 'U';
+
+  // Build absolute URL if needed – uses your getProfileImageUrl
+  if (imgUrl) {
+    imgUrl = getProfileImageUrl(imgUrl);
+  }
+
+  if (imgUrl && imgUrl.length > 0) {
+    // Admin-style: set img tag with onerror fallback
+    el.innerHTML = '<img src="' + esc(imgUrl) + '" alt="' + esc(name) + '" ' +
+      'loading="lazy" ' +
+      'onerror="this.style.display=\'none\';' +
+      'this.parentElement.innerHTML=\'<span class=\\\'avatar-initials\\\'>' +
+      esc(getInitials(name)) + '</span>\';">';
+    el.style.background = 'transparent'; // image will cover it
+  } else {
+    // Fallback to initials
+    el.innerHTML = '<span class="avatar-initials">' + esc(getInitials(name)) + '</span>';
+    el.style.background = 'var(--green-primary)';
+  }
+}
+
+// Helper to extract initials (same as admin)
+function getInitials(name) {
+  if (!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
+  async function loadStats() {
+  try {
+    // Get total scans and avg confidence from /statistics
+    const statsRes = await authFetch('/api/user/statistics');
+    if (statsRes) {
+      const stats = await statsRes.json();
+      document.getElementById('statScans').textContent = stats.total_scans || 0;
+      let avgConf = '—';
+      if (stats.average_confidence && stats.average_confidence > 0) {
+        avgConf = (stats.average_confidence * 100).toFixed(1) + '%';
+      }
+      document.getElementById('statConf').textContent = avgConf;
+    }
+
+    // Favorites (unchanged)
+    const favRes = await authFetch('/api/user/favorites');
+    if (favRes) {
+      const favData = await favRes.json();
+      document.getElementById('statFavs').textContent = favData.favorites ? favData.favorites.length : 0;
+    }
+  } catch (error) {
+    console.error('Error loading stats:', error);
+  }
+}
+
+  // ---------- Recent Scans ----------
+  async function loadRecent() {
+    try {
+      const res = await authFetch('/api/user/scans');
+      if (!res) return;
+      const d = await res.json();
+      const el = document.getElementById('recentScans');
+      if (!d.scans || !d.scans.length) {
+        el.innerHTML = `
+          <div style="text-align:center;padding:1.5rem;color:var(--stone);">
+            <i class="fas fa-seedling" style="font-size:1.8rem;opacity:0.3;display:block;margin-bottom:0.5rem;"></i>
+            ${esc(t('no_scans_yet'))}<br>
+            <a href="/predict" style="color:var(--green-primary);font-weight:600;font-size:0.85rem;">${esc(t('start_detecting'))}</a>
+          </div>
+        `;
+        return;
+      }
+      el.innerHTML = d.scans.map(s => {
+        const name = (s.disease_name||'').replace(/___/g,' — ').replace(/_/g,' ');
+        const conf = s.confidence < 1 ? (s.confidence*100).toFixed(0) : s.confidence.toFixed(0);
+        const confClass = conf >= 70 ? 'high' : conf >= 40 ? 'medium' : 'low';
+        return `<div class="scan-row" onclick="window.location.href='/history'">
+          <div class="scan-icon"><i class="fas fa-leaf"></i></div>
+          <div class="scan-info">
+            <div class="scan-name">${esc(name)}</div>
+            <div class="scan-date">${fmtDate(s.scanned_at)}</div>
+          </div>
+          ${severityBadge(s.severity)}
+          <span class="scan-confidence ${confClass}">${conf}%</span>
+        </div>`;
+      }).join('');
+    } catch (error) {
+      console.error('Error loading recent scans:', error);
+    }
+  }
+
+  // ---------- Disease Library ----------
+  async function loadDiseases() {
+    try {
+      const res = await authFetch('/api/disease/user/diseases?per_page=200');
+      if (!res) return;
+      const d = await res.json();
+      allDiseases = d.diseases || [];
+      filtDiseases = [...allDiseases];
+      const crops = [...new Set(allDiseases.map(x=>x.crop_type).filter(Boolean))].sort();
+      const sel = document.getElementById('libCrop');
+      sel.innerHTML = `<option value="">${esc(t('all_crops'))}</option>`;
+      crops.forEach(c => sel.innerHTML += `<option value="${esc(c)}">${esc(c)}</option>`);
+      renderLib();
+    } catch {
+      document.getElementById('diseaseGrid').innerHTML =
+        `<p style="grid-column:1/-1;color:var(--stone);text-align:center;padding:1.5rem;font-size:0.85rem;">${esc(t('network_error'))}</p>`;
+    }
+  }
+
+  function filterLib() {
+    const s = document.getElementById('libSearch').value.toLowerCase();
+    const c = document.getElementById('libCrop').value;
+    filtDiseases = allDiseases.filter(d =>
+      (!s || (d.disease_name||'').toLowerCase().includes(s)) &&
+      (!c || d.crop_type === c)
+    );
+    libPage = 1; renderLib();
+  }
+
+  function renderLib() {
+    const grid = document.getElementById('diseaseGrid');
+    if (!filtDiseases.length) {
+      grid.innerHTML = `<p style="color:var(--stone);text-align:center;padding:0.8rem;font-size:0.85rem;">${esc(t('no_diseases_found'))}</p>`;
+      document.getElementById('libPagination').innerHTML = '';
+      return;
+    }
+    const start = (libPage-1)*LIB_PER;
+    const page = filtDiseases.slice(start, start+LIB_PER);
+    grid.innerHTML = page.map(d => {
+      const name = (d.disease_name||'').replace(/_/g,' ');
+      const crop = d.crop_type || t('crop_various');
+      const sKey = (d.severity_level||'medium').toLowerCase();
+      const sMap = {critical:'badge-critical',high:'badge-high',medium:'badge-medium',low:'badge-low'};
+      const imgUrl = getDiseaseImageUrl(d.sample_image_url);
+      const sevLabelKey = { critical:'sev_critical', high:'sev_high', medium:'sev_medium', low:'sev_low' }[sKey] || 'sev_medium';
+      return `<div class="disease-card" onclick="window.location.href='/disease-detail?id=${d.id}'">
+        <img class="disease-img" src="${imgUrl}" 
+             onerror="this.src='https://placehold.co/400x200/e8f5e9/1a2e1f?text='+encodeURIComponent('${esc(crop)}')" 
+             alt="${esc(name)}">
+        <div class="disease-info">
+          <div class="disease-name">${esc(name)}</div>
+          <div class="disease-crop"><i class="fas fa-seedling"></i> ${esc(crop)}</div>
+          <div class="disease-badge"><span class="badge ${sMap[sKey]||'badge-medium'}">${esc(t(sevLabelKey))}</span></div>
+        </div>
+      </div>`;
+    }).join('');
+
+    const pages = Math.ceil(filtDiseases.length/LIB_PER);
+    let ph = pages > 1 ? `<button class="page-btn" onclick="libGo(${libPage-1})" ${libPage===1?'disabled':''}>‹</button>` : '';
+    for(let i=1;i<=pages;i++) ph += `<button class="page-btn${i===libPage?' active':''}" onclick="libGo(${i})">${i}</button>`;
+    if(pages>1) ph += `<button class="page-btn" onclick="libGo(${libPage+1})" ${libPage===pages?'disabled':''}>›</button>`;
+    document.getElementById('libPagination').innerHTML = ph;
+  }
+
+  function libGo(p) {
+    if(p<1||p>Math.ceil(filtDiseases.length/LIB_PER)) return;
+    libPage=p; renderLib();
+    document.getElementById('diseaseGrid').scrollIntoView({behavior:'smooth'});
+  }
+
+  // ---------- Profile Modal ----------
+  function openProfile() { renderProfile(false); document.getElementById('profileModal').classList.add('open'); }
+  function closeProfile() { document.getElementById('profileModal').classList.remove('open'); isEdit=false; }
+
+  function renderProfile(edit) {
+    isEdit = edit;
+    const u = currentUser || {};
+    const pic = u.profile_pic || u.profile_image || '';
+    let imgHtml = '';
+    if (pic) {
+      let imgUrl = getProfileImageUrl(pic);
+      imgHtml = `<img id="profPicEl" src="${imgUrl}" style="width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--green-primary);">`;
+    } else {
+      imgHtml = `<div id="profInitEl" style="width:90px;height:90px;border-radius:50%;background:var(--green-primary);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:700;color:#fff;margin:0 auto;">${(u.name || 'U').charAt(0)}</div>`;
+    }
+
+    document.getElementById('profileBody').innerHTML = `
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <div style="display:inline-block;position:relative;">
+          ${imgHtml}
+          <label style="position:absolute;bottom:0;right:0;background:var(--green-primary);color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.65rem;">
+            <i class="fas fa-camera"></i>
+            <input type="file" accept="image/*" style="display:none;" onchange="openCropper(this.files[0])">
+          </label>
+        </div>
+      </div>
+      ${edit ? `
+        <div class="form-group"><label class="form-label">${esc(t('full_name'))}</label><input class="edit-inp" id="editName" value="${esc(u.name||'')}"></div>
+        <div class="form-group"><label class="form-label">${esc(t('email'))}</label><input class="edit-inp" id="editEmail" type="email" value="${esc(u.email||'')}"></div>
+        <div class="form-group"><label class="form-label">${esc(t('phone'))}</label><input class="edit-inp" id="editPhone" value="${esc(u.phone||'')}"></div>
+        <div class="form-group"><label class="form-label">${esc(t('address'))}</label><input class="edit-inp" id="editAddr" value="${esc(u.address||'')}"></div>
+        <div style="display:flex;gap:8px;"><button class="btn btn-primary" style="flex:1;" onclick="saveProfile()">${esc(t('save'))}</button><button class="btn btn-secondary" onclick="renderProfile(false)">${esc(t('cancel'))}</button></div>
+      ` : `
+        <div class="detail-row"><div class="detail-key">${esc(t('name'))}</div><div class="detail-val">${esc(u.name||'—')}</div></div>
+        <div class="detail-row"><div class="detail-key">${esc(t('email'))}</div><div class="detail-val">${esc(u.email||'—')}</div></div>
+        <div class="detail-row"><div class="detail-key">${esc(t('phone'))}</div><div class="detail-val">${esc(u.phone||t('not_provided'))}</div></div>
+        <div class="detail-row"><div class="detail-key">${esc(t('address'))}</div><div class="detail-val">${esc(u.address||t('not_provided'))}</div></div>
+        <div class="detail-row"><div class="detail-key">${esc(t('role'))}</div><div class="detail-val"><span class="badge badge-info">${esc(u.role||t('role_user'))}</span></div></div>
+        <button class="btn btn-primary btn-full" style="margin-top:1rem;" onclick="renderProfile(true)"><i class="fas fa-edit"></i> ${esc(t('edit_profile'))}</button>
+      `}
+    `;
+  }
+
+  // ---------- Save Profile (with success alert) ----------
+  async function saveProfile() {
+    const data = {
+      name: document.getElementById('editName').value,
+      email: document.getElementById('editEmail').value,
+      phone: document.getElementById('editPhone').value,
+      address: document.getElementById('editAddr').value
+    };
+    const res = await authFetch('/api/auth/update-profile', {method:'PUT', body:JSON.stringify(data)});
+    if (!res) return;
+    const d = await res.json();
+    if (res.ok) {
+      currentUser = d.user;
+      localStorage.setItem('user', JSON.stringify(d.user));
+      document.getElementById('welcomeName').textContent = d.user.name;
+      setAvatarOrInitials(document.getElementById('navAvatar'), d.user);
+      
+      // Show success message inside profile modal
+      const profileBody = document.getElementById('profileBody');
+      const msgEl = document.createElement('div');
+      msgEl.className = 'alert success';
+      msgEl.innerText = '✓ Profile updated successfully!';
+      msgEl.style.marginBottom = '1.5rem';
+      msgEl.style.fontSize = '0.9rem';
+      msgEl.style.fontWeight = '600';
+      profileBody.insertBefore(msgEl, profileBody.firstChild);
+      
+      setTimeout(() => {
+        closeProfile();
+        renderProfile(false);
+      }, 1200);
+      
+      showAlert('alertMsg', 'Profile updated successfully!', 'success');
+    } else {
+      const profileBody = document.getElementById('profileBody');
+      const msgEl = document.createElement('div');
+      msgEl.className = 'alert error';
+      msgEl.innerText = '✗ ' + (d.error || 'Update failed.');
+      msgEl.style.marginBottom = '1.5rem';
+      msgEl.style.fontSize = '0.9rem';
+      profileBody.insertBefore(msgEl, profileBody.firstChild);
+    }
+  }
+
+  // ---------- Cropper ----------
+  let cropperLoadPromise = null;
+  function ensureCropperLoaded() {
+    if (window.Cropper) return Promise.resolve();
+    if (cropperLoadPromise) return cropperLoadPromise;
+    cropperLoadPromise = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js';
+      s.onload = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+    return cropperLoadPromise;
+  }
+
+  async function openCropper(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async e => {
+      document.getElementById('cropImg').src = e.target.result;
+      document.getElementById('cropModal').classList.add('open');
+      try {
+        await ensureCropperLoaded();
+      } catch {
+        showAlert('alertMsg', 'Failed to load cropper.', 'error');
+        closeCropModal();
+        return;
+      }
+      setTimeout(() => { if(cropper) cropper.destroy(); cropper = new Cropper(document.getElementById('cropImg'), {aspectRatio:1,viewMode:1}); }, 150);
+    };
+    reader.readAsDataURL(file);
+  }
+  function closeCropModal() { document.getElementById('cropModal').classList.remove('open'); if(cropper){cropper.destroy();cropper=null;} }
+  async function doCrop() {
+    if (!cropper) return;
+    const canvas = cropper.getCroppedCanvas({width:300,height:300});
+    canvas.toBlob(async blob => {
+      const fd = new FormData(); fd.append('profile_pic', blob, 'profile.jpg');
+      const token = getToken();
+      const res = await fetch('/api/auth/upload-profile-pic', {method:'POST', headers:{'Authorization':'Bearer '+token}, body:fd});
+      const d = await res.json();
+      if (res.ok) {
+        // Update user data immediately
+        if (d.user) {
+          currentUser = d.user;
+          localStorage.setItem('user', JSON.stringify(d.user));
+        } else {
+          await fetchUser();
+        }
+        
+        const navAvatar = document.getElementById('navAvatar');
+        setAvatarOrInitials(navAvatar, currentUser);
+        
+        // Show success message in crop modal
+        const cropImg = document.getElementById('cropImg');
+        const msgEl = document.createElement('div');
+        msgEl.className = 'alert success';
+        msgEl.innerText = '✓ Profile picture updated!';
+        msgEl.style.marginTop = '1rem';
+        msgEl.style.marginBottom = '0.5rem';
+        msgEl.style.fontSize = '0.9rem';
+        msgEl.style.fontWeight = '600';
+        cropImg.parentNode.insertBefore(msgEl, cropImg.nextSibling);
+        
+        setTimeout(() => {
+          closeCropModal();
+          renderProfile(false);
+          showAlert('alertMsg', 'Profile picture updated!', 'success');
+        }, 1200);
+      } else {
+        showAlert('alertMsg', d.error || 'Upload failed.', 'error');
+      }
+    }, 'image/jpeg', 0.92);
+  }
+
+  // ---------- Change Password ----------
+  function openChangePw() { document.getElementById('pwModal').classList.add('open'); }
+  function closePw() { document.getElementById('pwModal').classList.remove('open'); }
+  async function submitPwChange() {
+    const cur = document.getElementById('curPw').value;
+    const nw = document.getElementById('newPw').value;
+    const cf = document.getElementById('cfmPw').value;
+    if (!cur||!nw||!cf) { showAlert('pwAlert', 'All fields required.', 'error'); return; }
+    if (nw !== cf) { showAlert('pwAlert', 'Passwords do not match.', 'error'); return; }
+    const res = await authFetch('/api/auth/change-password', {method:'POST', body:JSON.stringify({old_password:cur, new_password:nw})});
+    if (!res) return;
+    const d = await res.json();
+    if (res.ok) {
+      const pwAlert = document.getElementById('pwAlert');
+      pwAlert.className = 'alert success';
+      pwAlert.innerText = '✓ Password updated successfully!';
+      pwAlert.style.display = 'block';
+      document.getElementById('curPw').value = '';
+      document.getElementById('newPw').value = '';
+      document.getElementById('cfmPw').value = '';
+      setTimeout(closePw, 1500);
+      showAlert('alertMsg', 'Password updated!', 'success');
+    }
+    else {
+      showAlert('pwAlert', d.error || 'Failed.', 'error');
+    }
+  }
+
+  // ---------- Feedback (with success alert) ----------
+  function openFeedback() { document.getElementById('feedbackModal').classList.add('open'); }
+  function closeFeedback() { document.getElementById('feedbackModal').classList.remove('open'); }
+  async function submitFeedback() {
+    const msg = document.getElementById('fbMsg').value.trim();
+    if (!msg) {
+      showAlert('fbAlert', 'Please write a message.', 'error');
+      return;
+    }
+    const res = await authFetch('/api/feedback', {method:'POST', body:JSON.stringify({message:msg})});
+    if (!res) return;
+    const d = await res.json();
+    if (res.ok) {
+      const fbAlert = document.getElementById('fbAlert');
+      fbAlert.className = 'alert success';
+      fbAlert.innerText = '✓ Thank you for your feedback!';
+      fbAlert.style.display = 'block';
+      fbAlert.style.marginBottom = '1rem';
+      document.getElementById('fbMsg').value = '';
+      setTimeout(() => {
+        closeFeedback();
+      }, 1800);
+      showAlert('alertMsg', 'Thank you for your feedback!', 'success');
+    } else {
+      const fbAlert = document.getElementById('fbAlert');
+      fbAlert.className = 'alert error';
+      fbAlert.innerText = '✗ ' + (d.error || 'Failed to send feedback.');
+      fbAlert.style.display = 'block';
+    }
+  }
+
+  // ---------- Delete History ----------
+  async function confirmDelHistory() {
+    if (!confirm('Delete all your scan history?')) return;
+    document.getElementById('loader').style.display='flex';
+    const res = await authFetch('/api/user/history', {method:'DELETE'});
+    document.getElementById('loader').style.display='none';
+    if (!res) return;
+    if (res.ok) {
+      showAlert('alertMsg', 'History cleared.', 'success');
+      await loadStats();
+      document.getElementById('recentScans').innerHTML = `
+        <div style="text-align:center;padding:1.5rem;color:var(--stone);">
+          <i class="fas fa-seedling" style="font-size:1.8rem;opacity:0.3;display:block;margin-bottom:0.5rem;"></i>
+          No scans yet.<br>
+          <a href="/predict" style="color:var(--green-primary);font-weight:600;font-size:0.85rem;">Start detecting →</a>
+        </div>
+      `;
+    } else {
+      showAlert('alertMsg', 'Failed to clear history.', 'error');
+    }
+  }
+
+  // ---------- Menu ----------
+  function initMenu() {
+    const mb = document.getElementById('menuBtn'), dm = document.getElementById('dropMenu');
+    mb.addEventListener('click', e=>{e.stopPropagation(); dm.classList.toggle('show');});
+    document.addEventListener('click', ()=>dm.classList.remove('show'));
+    ['profileModal','pwModal','feedbackModal','cropModal'].forEach(id => {
+      document.getElementById(id).addEventListener('click', e=>{ if(e.target===e.currentTarget) e.target.classList.remove('open'); });
+    });
+  }
+</script>
+</body>
+</html>

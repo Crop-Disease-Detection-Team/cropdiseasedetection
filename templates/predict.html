@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Disease Detection — Crop Disease AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* ========== SAME COLORS AS USER-DASHBOARD / HISTORY / REGISTER / LOGIN ========== */
+    :root {
+      --green-dark: #0f2b14;
+      --green-primary: #2c6e2f;
+      --green-light: #4c9a4a;
+      --cream-bg: #FDF9F0;
+      --sand: #e9e0d3;
+      --stone: #5e4b3c;
+      --gray-soft: #f5f2ec;
+      --amber-500: #d97706;
+      --shadow-sm: 0 8px 20px rgba(0,0,0,0.03), 0 2px 6px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+      --transition: all 0.2s ease;
+      --radius-xl: 24px;
+      --radius-lg: 16px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--cream-bg);
+      color: var(--stone);
+      min-height: 100vh;
+    }
+
+    body.np-font { font-family: 'Noto Sans Devanagari', sans-serif; }
+
+    /* Language toggle — docked inline in the navbar, never position:fixed */
+    .lang-switch-inline {
+      background: var(--gray-soft);
+      border-radius: 60px;
+      padding: 6px 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      border: 1px solid var(--sand);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      color: var(--stone);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .lang-switch-inline:hover { background: var(--sand); }
+    .lang-switch-inline svg { width: 14px; height: 14px; color: var(--green-primary); flex-shrink: 0; }
+
+    /* Navbar */
+    .navbar {
+      background: white;
+      padding: 0.7rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--sand);
+      position: sticky;
+      top: 0;
+      z-index: 99;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .logo { font-size: 1.1rem; font-weight: 800; color: var(--green-primary); }
+    .nav-links { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
+    .nav-links a { color: var(--stone); text-decoration: none; font-weight: 500; transition: var(--transition); font-size: 0.85rem; }
+    .nav-links a:hover { color: var(--green-primary); }
+    .nav-links a.active { color: var(--green-primary); font-weight: 700; }
+
+    .navbar-right-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: nowrap;
+      flex-shrink: 0;
+    }
+
+    .menu-container { position: relative; flex-shrink: 0; }
+    .hamburger-btn { background: none; border: none; font-size: 1.1rem; cursor: pointer; color: var(--stone); padding: 4px 6px; flex-shrink: 0; }
+    .hamburger-btn:hover { color: var(--green-primary); }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: 100%;
+      background: white;
+      border: 1px solid var(--sand);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      min-width: 190px;
+      padding: 0.4rem 0;
+      margin-top: 0.5rem;
+      z-index: 100;
+    }
+    .dropdown-menu.show { display: block; }
+    .dropdown-item { padding: 0.5rem 1rem; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 0.82rem; transition: var(--transition); color: var(--stone); }
+    .dropdown-item:hover { background: var(--gray-soft); color: var(--green-primary); }
+    .dropdown-item i { width: 18px; font-size: 0.85rem; }
+
+    .container { max-width: 1000px; margin: 0 auto; padding: 0 1.5rem 3rem; }
+
+    .page-title { font-size: 1.6rem; font-weight: 700; color: var(--green-dark); margin: 1.5rem 0 .25rem; }
+    .page-sub { color: var(--stone); opacity: .75; font-size: .9rem; margin-bottom: 1.5rem; }
+
+    .card {
+      background: white;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--sand);
+      box-shadow: var(--shadow-sm);
+    }
+    .card-body { padding: 1.25rem; }
+
+    .upload-wrap { max-width: 100%; }
+
+    /* Mode tabs (Single / Batch) */
+    .mode-tabs {
+      display: flex;
+      gap: 6px;
+      background: var(--gray-soft);
+      border-radius: 50px;
+      padding: 4px;
+      width: fit-content;
+      margin-bottom: 1.25rem;
+    }
+    .mode-tab {
+      padding: 7px 18px;
+      border-radius: 50px;
+      border: none;
+      background: transparent;
+      font-size: .82rem;
+      font-weight: 600;
+      color: var(--stone);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .mode-tab.active { background: var(--green-primary); color: white; }
+
+    .upload-area {
+      border: 2px dashed var(--sand);
+      border-radius: var(--radius-lg);
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: var(--transition);
+      background: var(--gray-soft);
+    }
+    .upload-area:hover, .upload-area.dragover { border-color: var(--green-primary); background: #f0f6ee; }
+    .upload-icon { font-size: 2.2rem; color: var(--green-primary); opacity: .6; margin-bottom: .6rem; }
+
+    .preview-img { max-width: 100%; max-height: 300px; border-radius: var(--radius-lg); margin: 1rem auto; display: block; box-shadow: var(--shadow-md); }
+
+    .btn {
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .85rem;
+      text-decoration: none;
+    }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-sm { padding: 7px 14px; font-size: .78rem; }
+    .btn-primary { background: var(--green-primary); color: white; }
+    .btn-primary:hover:not(:disabled) { background: #1f5922; transform: translateY(-1px); }
+    .btn-secondary { background: var(--gray-soft); color: var(--stone); }
+    .btn-secondary:hover { background: var(--sand); }
+
+    /* Guidance / limitations panel */
+    .guidance-card {
+      background: #f4f8f1;
+      border: 1px solid #dcebd4;
+      border-radius: var(--radius-md);
+      padding: 1.1rem 1.25rem;
+      margin: 1.25rem 0;
+    }
+    .guidance-title {
+      font-weight: 700;
+      font-size: .92rem;
+      color: var(--green-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: .6rem;
+    }
+    .guidance-dataset-note {
+      font-size: .82rem;
+      color: var(--stone);
+      line-height: 1.6;
+      margin-bottom: .9rem;
+      padding-bottom: .9rem;
+      border-bottom: 1px solid #dcebd4;
+    }
+    .guidance-tips-title {
+      font-size: .78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+      color: var(--green-primary);
+      margin-bottom: .5rem;
+    }
+    .guidance-tips { list-style: none; display: flex; flex-direction: column; gap: .4rem; margin-bottom: .9rem; }
+    .guidance-tips li { display: flex; align-items: flex-start; gap: 8px; font-size: .83rem; color: var(--stone); line-height: 1.5; }
+    .guidance-tips li i { color: var(--green-primary); font-size: .75rem; margin-top: .3rem; flex-shrink: 0; }
+    .guidance-disclaimer { font-size: .76rem; color: var(--stone); opacity: .75; line-height: 1.5; font-style: italic; }
+
+    /* Batch upload list */
+    .batch-list { display: flex; flex-direction: column; gap: 8px; margin-top: 1rem; }
+    .batch-item {
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      padding: .6rem .8rem;
+      border: 1px solid var(--sand);
+      border-radius: var(--radius-sm);
+      background: white;
+    }
+    .batch-thumb { width: 44px; height: 44px; border-radius: var(--radius-sm); object-fit: cover; flex-shrink: 0; background: var(--gray-soft); }
+    .batch-item-info { flex: 1; min-width: 0; }
+    .batch-item-name { font-size: .82rem; font-weight: 600; color: var(--green-dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .batch-item-status { font-size: .72rem; color: var(--stone); opacity: .7; margin-top: 2px; }
+    .batch-item-status.success { color: var(--green-primary); opacity: 1; font-weight: 600; }
+    .batch-item-status.failed { color: #dc2626; opacity: 1; font-weight: 600; }
+    .batch-remove-btn { background: none; border: none; color: var(--stone); opacity: .5; cursor: pointer; font-size: .9rem; padding: 4px; flex-shrink: 0; }
+    .batch-remove-btn:hover { opacity: 1; color: #dc2626; }
+    .batch-progress-bar { height: 5px; background: var(--sand); border-radius: 10px; overflow: hidden; margin-top: 1rem; }
+    .batch-progress-fill { height: 100%; background: var(--green-primary); transition: width .3s ease; }
+    .batch-progress-text { font-size: .8rem; color: var(--stone); margin-top: .4rem; text-align: center; }
+
+    /* Alert */
+    .alert { padding: 10px 14px; border-radius: var(--radius-md); margin-bottom: 1rem; font-size: .8rem; display: none; }
+    .alert.success { background: #e8f5e9; border-left: 4px solid var(--green-primary); color: #1e4620; display: block; }
+    .alert.error { background: #fef2f2; border-left: 4px solid #dc2626; color: #991b1b; display: block; }
+
+    /* Result card */
+    .result-card { background: white; border-radius: var(--radius-md); border: 1px solid var(--sand); box-shadow: var(--shadow-sm); overflow: hidden; margin-top: 1.5rem; }
+    .result-header { background: var(--green-primary); color: white; padding: 1rem 1.25rem; }
+    .result-body { padding: 1.25rem; }
+    .result-hero { display: flex; align-items: flex-start; gap: 1.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .result-meta { flex: 1; min-width: 200px; }
+    .result-meta h2 { font-size: 1.25rem; font-weight: 700; color: var(--green-dark); margin-bottom: .4rem; }
+    .conf-label { font-size: .78rem; color: var(--stone); opacity: .7; margin-bottom: .2rem; }
+
+    .confidence-ring {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.18);
+      border: 2px solid rgba(255,255,255,.5);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: .82rem; color: white; flex-shrink: 0;
+    }
+
+    .severity-badge { font-size: .72rem; padding: 4px 12px; border-radius: 50px; font-weight: 600; display: inline-block; }
+    .severity-badge.high { background: #fef2f2; color: #991b1b; }
+    .severity-badge.medium { background: #fefce8; color: #854d0e; }
+    .severity-badge.low { background: #f0fdf4; color: #166534; }
+
+    .top-preds { display: flex; flex-direction: column; gap: .5rem; }
+    .pred-row { display: flex; align-items: center; gap: .75rem; font-size: .85rem; }
+    .pred-name { flex: 1; color: var(--stone); }
+    .pred-bar { width: 90px; height: 6px; background: var(--sand); border-radius: 10px; overflow: hidden; flex-shrink: 0; }
+    .pred-bar-fill { height: 100%; background: var(--green-primary); border-radius: 10px; }
+    .pred-pct { font-weight: 600; color: var(--green-primary); min-width: 42px; text-align: right; }
+
+    .tab-nav { display: flex; gap: 4px; border-bottom: 1px solid var(--sand); margin-bottom: 1.1rem; flex-wrap: wrap; }
+    .tab-btn { padding: 8px 16px; border: none; background: none; font-size: .82rem; font-weight: 600; color: var(--stone); opacity: .6; cursor: pointer; border-bottom: 2px solid transparent; transition: var(--transition); }
+    .tab-btn.active { opacity: 1; color: var(--green-primary); border-bottom-color: var(--green-primary); }
+    .treatment-tab { display: none; }
+    .treatment-tab.active { display: block; }
+
+    .medicines-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap: 1rem; }
+    .med-card { background: var(--gray-soft); border-radius: var(--radius-md); padding: 1rem; border: 1px solid var(--sand); }
+    .med-name { font-weight: 700; font-size: .9rem; color: var(--green-dark); margin-bottom: .4rem; }
+    .med-detail { font-size: .78rem; color: var(--stone); opacity: .8; margin: .15rem 0; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 50px; font-size: .6rem; font-weight: 600; }
+    .badge-low { background: #f0fdf4; color: #166534; }
+
+    /* Loading overlay */
+    .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,.85); z-index: 999; align-items: center; justify-content: center; flex-direction: column; }
+    .loading-overlay.show { display: flex; }
+    .spinner { width: 36px; height: 36px; border: 3px solid var(--sand); border-top-color: var(--green-primary); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-txt { margin-top: .75rem; font-size: .9rem; color: var(--green-dark); font-weight: 600; }
+
+    @media (max-width: 560px) {
+      .lang-switch-inline span { display: none; }
+      .lang-switch-inline { padding: 6px 8px; }
+      .navbar { padding: 0.6rem 1rem; }
+      .container { padding: 0 1rem 2rem; }
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="logo">CropDisease AI</div>
+  <div class="nav-links">
+    <a href="/user-dashboard" data-lang-key="nav_dashboard">Dashboard</a>
+    <a href="/predict" class="active" data-lang-key="nav_detect">Detect</a>
+    <a href="/history" data-lang-key="nav_history">History</a>
+    <div class="navbar-right-group">
+      <div class="lang-switch-inline" id="langToggle">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/>
+          <path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/>
+        </svg>
+        <span id="langBtnText">नेपाली</span>
+      </div>
+      <div class="menu-container">
+        <button class="hamburger-btn" id="menuBtn"><i class="fas fa-bars"></i></button>
+        <div class="dropdown-menu" id="dropMenu">
+          <div class="dropdown-item" onclick="window.location.href='/user-dashboard'"><i class="fas fa-home"></i><span data-lang-key="nav_dashboard">Dashboard</span></div>
+          <div class="dropdown-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i><span data-lang-key="logout">Logout</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <h1 class="page-title" data-lang-key="pred_page_title">AI Disease Detection</h1>
+  <p class="page-sub" data-lang-key="pred_page_sub">Upload a clear photo of the affected crop leaf to get an instant diagnosis.</p>
+  <div id="alertMsg" class="alert"></div>
+
+  <!-- Mode switch -->
+  <div class="mode-tabs">
+    <button class="mode-tab active" id="modeTabSingle" onclick="switchMode('single')" data-lang-key="pred_mode_single">Single Scan</button>
+    <button class="mode-tab" id="modeTabBatch" onclick="switchMode('batch')" data-lang-key="pred_mode_batch">Batch Scan</button>
+  </div>
+
+  <!-- ===== SINGLE MODE ===== -->
+  <div id="singleMode">
+    <div class="card upload-wrap" style="margin-bottom:1.5rem;">
+      <div class="card-body">
+        <div class="upload-area" id="dropZone" onclick="document.getElementById('fileInput').click()">
+          <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+          <p style="font-weight:600;color:var(--green-dark);font-size:1rem;" data-lang-key="pred_drop_title">Drop your image here</p>
+          <p style="color:var(--stone);opacity:.7;font-size:.85rem;margin-top:.4rem;" data-lang-key="pred_drop_sub">or click to browse — PNG, JPG, WEBP up to 16 MB</p>
+          <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp" style="display:none" onchange="onFileSelect(this.files[0])">
+        </div>
+        <div id="previewWrap" style="display:none;text-align:center;">
+          <img id="previewImg" class="preview-img">
+          <p id="previewName" style="font-size:.82rem;color:var(--stone);opacity:.7;margin:.5rem 0;"></p>
+        </div>
+
+        <!-- Guidance / limitations panel -->
+        <div class="guidance-card">
+          <div class="guidance-title"><i class="fas fa-circle-info"></i> <span data-lang-key="pred_guidance_title">Before you scan</span></div>
+          <p class="guidance-dataset-note" data-lang-key="pred_guidance_dataset_note">This model is trained on the PlantVillage dataset and works best on crops and diseases represented in that dataset. Results for other crops or unusual conditions may be less reliable.</p>
+          <div class="guidance-tips-title" data-lang-key="pred_guidance_tips_title">For best results</div>
+          <ul class="guidance-tips">
+            <li><i class="fas fa-check"></i><span data-lang-key="pred_tip_single_leaf">Photograph a single leaf, not the whole plant</span></li>
+            <li><i class="fas fa-check"></i><span data-lang-key="pred_tip_lighting">Use natural daylight — avoid harsh shadows or flash glare</span></li>
+            <li><i class="fas fa-check"></i><span data-lang-key="pred_tip_focus">Keep the leaf in sharp focus, filling most of the frame</span></li>
+            <li><i class="fas fa-check"></i><span data-lang-key="pred_tip_background">Use a plain, contrasting background (a table or your hand works well)</span></li>
+            <li><i class="fas fa-check"></i><span data-lang-key="pred_tip_one_disease">One leaf per photo gives the most accurate diagnosis</span></li>
+          </ul>
+          <p class="guidance-disclaimer" data-lang-key="pred_guidance_disclaimer">This tool offers AI-assisted guidance, not a substitute for a professional agronomist. For valuable crops or uncertain cases, please confirm with a local expert before acting.</p>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:1rem;flex-wrap:wrap;">
+          <button class="btn btn-primary" id="detectBtn" onclick="runDetection()" disabled>
+            <i class="fas fa-microscope"></i> <span id="detectTxt" data-lang-key="pred_analyse">Analyse Image</span>
+          </button>
+          <button class="btn btn-secondary" id="clearBtn" onclick="clearImage()" style="display:none;">
+            <i class="fas fa-times"></i> <span data-lang-key="pred_clear">Clear</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div id="resultSection" style="display:none;"></div>
+  </div>
+
+  <!-- ===== BATCH MODE ===== -->
+  <div id="batchMode" style="display:none;">
+    <div class="card upload-wrap" style="margin-bottom:1.5rem;">
+      <div class="card-body">
+        <div class="upload-area" id="batchDropZone" onclick="document.getElementById('batchFileInput').click()">
+          <div class="upload-icon"><i class="fas fa-images"></i></div>
+          <p style="font-weight:600;color:var(--green-dark);font-size:1rem;" data-lang-key="pred_batch_drop_title">Drop multiple images here</p>
+          <p style="color:var(--stone);opacity:.7;font-size:.85rem;margin-top:.4rem;" data-lang-key="pred_batch_drop_sub">or click to browse — select multiple PNG, JPG, WEBP files</p>
+          <input type="file" id="batchFileInput" accept="image/png,image/jpeg,image/webp" multiple style="display:none" onchange="onBatchFilesSelect(this.files)">
+        </div>
+
+        <!-- Guidance panel (shared content, shown in batch mode too) -->
+        <div class="guidance-card">
+          <div class="guidance-title"><i class="fas fa-circle-info"></i> <span data-lang-key="pred_guidance_title">Before you scan</span></div>
+          <p class="guidance-dataset-note" data-lang-key="pred_guidance_dataset_note">This model is trained on the PlantVillage dataset and works best on crops and diseases represented in that dataset. Results for other crops or unusual conditions may be less reliable.</p>
+          <div class="guidance-tips-title" data-lang-key="pred_guidance_tips_title">For best results</div>
+          <ul class="guidance-tips">
+            <li><i class="fas fa-check"></i><span data-lang-key="pred_tip_single_leaf">Photograph a single leaf, not the whole plant</span></li>
+            <li><i class="fas fa-check"></i><span data-lang-key="pred_tip_lighting">Use natural daylight — avoid harsh shadows or flash glare</span></li>
+            <li><i class="fas fa-check"></i><span data-lang-key="pred_tip_focus">Keep the leaf in sharp focus, filling most of the frame</span></li>
+            <li><i class="fas fa-check"></i><span data-lang-key="pred_tip_background">Use a plain, contrasting background (a table or your hand works well)</span></li>
+            <li><i class="fas fa-check"></i><span data-lang-key="pred_tip_one_disease">One leaf per photo gives the most accurate diagnosis</span></li>
+          </ul>
+          <p class="guidance-disclaimer" data-lang-key="pred_guidance_disclaimer">This tool offers AI-assisted guidance, not a substitute for a professional agronomist. For valuable crops or uncertain cases, please confirm with a local expert before acting.</p>
+        </div>
+
+        <div id="batchList" class="batch-list"></div>
+
+        <div id="batchProgressWrap" style="display:none;">
+          <div class="batch-progress-bar"><div class="batch-progress-fill" id="batchProgressFill" style="width:0%;"></div></div>
+          <div class="batch-progress-text" id="batchProgressText"></div>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-top:1rem;flex-wrap:wrap;">
+          <button class="btn btn-primary" id="batchDetectBtn" onclick="runBatchDetection()" disabled>
+            <i class="fas fa-microscope"></i> <span data-lang-key="pred_batch_analyse">Analyse All</span>
+          </button>
+          <button class="btn btn-secondary" id="batchClearBtn" onclick="clearBatch()" style="display:none;">
+            <i class="fas fa-times"></i> <span data-lang-key="pred_batch_clear">Clear All</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Batch result detail (reuses the same result-card markup as single mode) -->
+    <div id="batchResultSection" style="display:none;"></div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loader">
+  <div class="spinner"></div>
+  <div class="loading-txt" id="loaderTxt" data-lang-key="pred_analysing_overlay">Analysing your crop image…</div>
+  <div style="color:var(--stone);opacity:.6;font-size:.8rem;margin-top:.5rem;" data-lang-key="pred_may_take_seconds">This may take a few seconds</div>
+</div>
+
+<script src="/statics/js/auth.js"></script>
+<script src="/statics/js/shared.js"></script>
+<script>
+  requireAuth('user');
+
+  // ---------- Language toggle ----------
+  document.getElementById('langToggle').addEventListener('click', () => {
+    if (typeof window.LangManager !== 'undefined') {
+      const newLang = window.LangManager.currentLang === 'en' ? 'np' : 'en';
+      window.LangManager.setLanguage(newLang);
+    }
+  });
+  function updateLangButtonText() {
+    const btnText = document.getElementById('langBtnText');
+    if (btnText && typeof window.LangManager !== 'undefined') {
+      btnText.innerText = window.LangManager.currentLang === 'en' ? 'नेपाली' : 'English';
+    }
+  }
+  // Re-render anything built in JS (results, batch list) when language
+  // switches, since data-lang-key alone can't reach text baked into
+  // template literals at render time.
+  window.addEventListener('langApplied', () => {
+    updateLangButtonText();
+    if (lastResult) showResult(lastResult, 'resultSection');
+    if (batchFiles.length) renderBatchList();
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof window.LangManager !== 'undefined') setTimeout(updateLangButtonText, 100);
+  });
+
+  // ---------- Mode switching ----------
+  function switchMode(mode) {
+    document.getElementById('singleMode').style.display = mode === 'single' ? 'block' : 'none';
+    document.getElementById('batchMode').style.display = mode === 'batch' ? 'block' : 'none';
+    document.getElementById('modeTabSingle').classList.toggle('active', mode === 'single');
+    document.getElementById('modeTabBatch').classList.toggle('active', mode === 'batch');
+  }
+
+  // ---------- Tabs (result detail) ----------
+  function switchTab(prefix, i) {
+    const ids = ['Description','Treatment','Prevention','Medicines'];
+    document.querySelectorAll(`#${prefix}TabNav .tab-btn`).forEach((b,j)=>b.classList.toggle('active', i===j));
+    ids.forEach((id,j)=>{
+      const el = document.getElementById(prefix+'Tab'+id);
+      if (el) el.classList.toggle('active', i===j);
+    });
+  }
+
+  // ===================================================================
+  // SINGLE MODE
+  // ===================================================================
+  const dz = document.getElementById('dropZone');
+  dz.addEventListener('dragover', e=>{e.preventDefault();dz.classList.add('dragover');});
+  dz.addEventListener('dragleave', ()=>dz.classList.remove('dragover'));
+  dz.addEventListener('drop', e=>{e.preventDefault();dz.classList.remove('dragover');if(e.dataTransfer.files[0])onFileSelect(e.dataTransfer.files[0]);});
+
+  let selectedFile = null;
+  let lastResult = null;
+
+  function onFileSelect(file) {
+    if (!file) return;
+    if (!['image/png','image/jpeg','image/webp'].includes(file.type)) {
+      showAlert('alertMsg', t('pred_only_image_types'), 'error'); return;
+    }
+    if (file.size > 16 * 1024 * 1024) {
+      showAlert('alertMsg', t('pred_image_too_large'), 'error'); return;
+    }
+    selectedFile = file;
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('previewImg').src = e.target.result;
+      document.getElementById('previewName').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
+      document.getElementById('previewWrap').style.display = 'block';
+      document.getElementById('dropZone').style.display = 'none';
+      document.getElementById('detectBtn').disabled = false;
+      document.getElementById('clearBtn').style.display = 'inline-flex';
+      document.getElementById('resultSection').style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function clearImage() {
+    selectedFile = null;
+    lastResult = null;
+    document.getElementById('fileInput').value = '';
+    document.getElementById('previewWrap').style.display = 'none';
+    document.getElementById('dropZone').style.display = 'block';
+    document.getElementById('detectBtn').disabled = true;
+    document.getElementById('clearBtn').style.display = 'none';
+    document.getElementById('resultSection').style.display = 'none';
+  }
+
+  async function runDetection() {
+    if (!selectedFile) return;
+    document.getElementById('loaderTxt').textContent = t('pred_analysing_overlay');
+    document.getElementById('loader').classList.add('show');
+    document.getElementById('detectBtn').disabled = true;
+
+    try {
+      const data = await predictOne(selectedFile);
+      lastResult = data;
+      showResult(data, 'resultSection');
+    } catch (err) {
+      showAlert('alertMsg', err.message || t('pred_detection_failed'), 'error');
+    } finally {
+      document.getElementById('loader').classList.remove('show');
+      document.getElementById('detectBtn').disabled = false;
+    }
+  }
+
+  // Shared low-level call used by both single and batch mode.
+  async function predictOne(file) {
+    const fd = new FormData();
+    fd.append('image', file);
+    const token = getToken();
+    let res;
+    try {
+      res = await fetch('/api/predict', { method:'POST', headers:{'Authorization':'Bearer '+token}, body: fd });
+    } catch {
+      throw new Error(t('pred_network_error'));
+    }
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || t('pred_detection_failed'));
+    return data;
+  }
+
+  function fmtDiseaseName(s) { return s ? s.replace(/___/g,' — ').replace(/_/g,' ') : '—'; }
+
+  // Renders a full result card into the given container id.
+  function showResult(d, containerId) {
+    const c = document.getElementById(containerId);
+    const tp = (d.top_predictions||[]).slice(0,4);
+    const meds = d.medicines || [];
+    const prefix = containerId; // unique tab namespace per container
+
+    c.innerHTML = `
+      <div class="result-card">
+        <div class="result-header">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;">
+            <div>
+              <div style="font-size:.72rem;opacity:.75;text-transform:uppercase;letter-spacing:.08em;">${esc(t('pred_result_label'))}</div>
+              <h2 style="font-size:1.3rem;margin-top:.2rem;color:white;">${esc(fmtDiseaseName(d.disease_name || d.disease_code))}</h2>
+            </div>
+            <div class="confidence-ring">${(d.confidence||0).toFixed(1)}%</div>
+          </div>
+        </div>
+        <div class="result-body">
+          <div class="result-hero">
+            <div class="result-meta">
+              <div class="conf-label">${esc(t('pred_crop_type'))}</div>
+              <div style="font-weight:600;font-size:.95rem;color:var(--green-dark);margin-bottom:.75rem;">${esc(d.crop_type || t('pred_unknown'))}</div>
+              <div class="conf-label">${esc(t('pred_severity'))}</div>
+              <div style="margin-bottom:.75rem;">${severityBadgeLabel(d.severity_level)}</div>
+              <div class="conf-label">${esc(t('pred_scientific_name'))}</div>
+              <div style="font-size:.85rem;color:var(--stone);opacity:.75;font-style:italic;">${esc(d.scientific_name || '—')}</div>
+            </div>
+            <div style="flex:1;min-width:180px;">
+              <div class="conf-label" style="margin-bottom:.5rem;">${esc(t('pred_top_predictions'))}</div>
+              <div class="top-preds">
+                ${tp.map(p => `
+                  <div class="pred-row">
+                    <span class="pred-name">${esc(fmtDiseaseName(p.disease_name))}</span>
+                    <div class="pred-bar"><div class="pred-bar-fill" style="width:${Math.min(100,p.confidence*100).toFixed(0)}%"></div></div>
+                    <span class="pred-pct">${(p.confidence*100).toFixed(1)}%</span>
+                  </div>`).join('')}
+              </div>
+            </div>
+          </div>
+
+          <div class="tab-nav" id="${prefix}TabNav">
+            <button class="tab-btn active" onclick="switchTab('${prefix}',0)">${esc(t('pred_tab_description'))}</button>
+            <button class="tab-btn" onclick="switchTab('${prefix}',1)">${esc(t('pred_tab_treatment'))}</button>
+            <button class="tab-btn" onclick="switchTab('${prefix}',2)">${esc(t('pred_tab_prevention'))}</button>
+            <button class="tab-btn" onclick="switchTab('${prefix}',3)">${esc(t('pred_tab_medicines'))}</button>
+          </div>
+          <div id="${prefix}TabDescription" class="treatment-tab active">
+            <p style="font-size:.9rem;color:var(--stone);line-height:1.7;">${esc(d.description || t('pred_no_description'))}</p>
+            <div style="margin-top:1rem;">
+              <div class="conf-label">${esc(t('pred_symptoms'))}</div>
+              <p style="font-size:.88rem;color:var(--stone);opacity:.85;line-height:1.6;margin-top:.25rem;">${esc(d.symptoms || '—')}</p>
+            </div>
+          </div>
+          <div id="${prefix}TabTreatment" class="treatment-tab">
+            <div style="margin-bottom:1rem;">
+              <div class="conf-label">${esc(t('pred_organic_treatment'))}</div>
+              <p style="font-size:.9rem;color:var(--stone);line-height:1.7;margin-top:.25rem;">${esc(d.organic_treatment || '—')}</p>
+            </div>
+            <div>
+              <div class="conf-label">${esc(t('pred_chemical_treatment'))}</div>
+              <p style="font-size:.9rem;color:var(--stone);line-height:1.7;margin-top:.25rem;">${esc(d.chemical_treatment || '—')}</p>
+            </div>
+          </div>
+          <div id="${prefix}TabPrevention" class="treatment-tab">
+            <p style="font-size:.9rem;color:var(--stone);line-height:1.7;">${esc(d.prevention_tips || '—')}</p>
+          </div>
+          <div id="${prefix}TabMedicines" class="treatment-tab">
+            <div class="medicines-grid">
+              ${meds.length ? meds.map(m => `
+                <div class="med-card">
+                  <div class="med-name">${esc(m.medicine_name)}</div>
+                  <div class="med-detail"><i class="fas fa-flask" style="color:var(--green-primary);margin-right:4px;"></i>${esc(m.active_ingredient||'—')}</div>
+                  <div class="med-detail"><i class="fas fa-vial" style="margin-right:4px;color:var(--stone);opacity:.5;"></i>${esc(m.dosage_per_liter||'—')}</div>
+                  <div class="med-detail"><i class="fas fa-spray-can" style="margin-right:4px;color:var(--stone);opacity:.5;"></i>${esc(m.application_method || t('pred_spray'))}</div>
+                  ${m.waiting_period_days ? `<div class="med-detail" style="color:var(--amber-500);"><i class="fas fa-clock"></i> ${m.waiting_period_days} ${esc(t('pred_waiting_period'))}</div>` : ''}
+                  ${m.is_organic ? `<span class="badge badge-low" style="margin-top:6px;">${esc(t('pred_organic_label'))}</span>` : ''}
+                </div>`).join('') : `<p style="color:var(--stone);opacity:.7;">${esc(t('pred_no_medicines'))}</p>`}
+            </div>
+          </div>
+
+          <div style="margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--sand);display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="clearImage()"><i class="fas fa-camera"></i> ${esc(t('pred_scan_another'))}</button>
+            <a href="/history" class="btn btn-secondary btn-sm"><i class="fas fa-history"></i> ${esc(t('pred_view_history'))}</a>
+          </div>
+        </div>
+      </div>`;
+    c.style.display = 'block';
+    c.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function severityBadgeLabel(sev) {
+    const s = (sev || 'medium').toLowerCase();
+    const map = { high:'high', medium:'medium', low:'low', critical:'high' };
+    const cls = map[s] || 'medium';
+    const labelKey = { critical:'sev_critical', high:'sev_high', medium:'sev_medium', low:'sev_low' }[s] || 'sev_medium';
+    return `<span class="severity-badge ${cls}">${esc(t(labelKey))}</span>`;
+  }
+
+  // ===================================================================
+  // BATCH MODE
+  // ===================================================================
+  const MAX_BATCH = 10;
+  let batchFiles = []; // [{file, status: 'pending'|'running'|'success'|'failed', result, error, previewUrl}]
+
+  const bdz = document.getElementById('batchDropZone');
+  bdz.addEventListener('dragover', e=>{e.preventDefault();bdz.classList.add('dragover');});
+  bdz.addEventListener('dragleave', ()=>bdz.classList.remove('dragover'));
+  bdz.addEventListener('drop', e=>{e.preventDefault();bdz.classList.remove('dragover');if(e.dataTransfer.files.length)onBatchFilesSelect(e.dataTransfer.files);});
+
+  function onBatchFilesSelect(fileList) {
+    const incoming = Array.from(fileList).filter(f => ['image/png','image/jpeg','image/webp'].includes(f.type));
+    if (!incoming.length) { showAlert('alertMsg', t('pred_only_image_types'), 'error'); return; }
+
+    const room = MAX_BATCH - batchFiles.length;
+    if (room <= 0) { showAlert('alertMsg', t('pred_batch_too_many'), 'error'); return; }
+    const toAdd = incoming.slice(0, room);
+    if (incoming.length > room) showAlert('alertMsg', t('pred_batch_too_many'), 'error');
+
+    toAdd.forEach(file => {
+      if (file.size > 16 * 1024 * 1024) return; // silently skip oversized; could alert per-file but keep it simple
+      const item = { file, status: 'pending', result: null, error: null, previewUrl: URL.createObjectURL(file) };
+      batchFiles.push(item);
+    });
+
+    document.getElementById('batchFileInput').value = '';
+    renderBatchList();
+  }
+
+  function removeBatchItem(idx) {
+    URL.revokeObjectURL(batchFiles[idx].previewUrl);
+    batchFiles.splice(idx, 1);
+    renderBatchList();
+  }
+
+  function clearBatch() {
+    batchFiles.forEach(it => URL.revokeObjectURL(it.previewUrl));
+    batchFiles = [];
+    document.getElementById('batchResultSection').style.display = 'none';
+    document.getElementById('batchProgressWrap').style.display = 'none';
+    renderBatchList();
+  }
+
+  function renderBatchList() {
+    const list = document.getElementById('batchList');
+    const detectBtn = document.getElementById('batchDetectBtn');
+    const clearBtn = document.getElementById('batchClearBtn');
+
+    if (!batchFiles.length) {
+      list.innerHTML = `<p style="color:var(--stone);opacity:.6;text-align:center;padding:1rem;font-size:.85rem;">${esc(t('pred_batch_empty'))}</p>`;
+      detectBtn.disabled = true;
+      clearBtn.style.display = 'none';
+      return;
+    }
+
+    clearBtn.style.display = 'inline-flex';
+    detectBtn.disabled = batchFiles.some(it => it.status === 'running');
+
+    list.innerHTML = batchFiles.map((it, idx) => {
+      let statusHtml;
+      if (it.status === 'success') {
+        statusHtml = `<div class="batch-item-status success"><i class="fas fa-check-circle"></i> ${esc(fmtDiseaseName(it.result.disease_name || it.result.disease_code))} — <a href="#" onclick="viewBatchResult(${idx});return false;" style="color:var(--green-primary);">${esc(t('pred_batch_view_result'))}</a></div>`;
+      } else if (it.status === 'failed') {
+        statusHtml = `<div class="batch-item-status failed"><i class="fas fa-times-circle"></i> ${esc(t('pred_batch_failed_label'))}: ${esc(it.error || '')}</div>`;
+      } else if (it.status === 'running') {
+        statusHtml = `<div class="batch-item-status">${esc(t('pred_analysing'))}</div>`;
+      } else {
+        statusHtml = `<div class="batch-item-status">${(it.file.size/1024).toFixed(0)} KB</div>`;
+      }
+      return `<div class="batch-item">
+        <img class="batch-thumb" src="${it.previewUrl}">
+        <div class="batch-item-info">
+          <div class="batch-item-name">${esc(it.file.name)}</div>
+          ${statusHtml}
+        </div>
+        ${it.status === 'pending' ? `<button class="batch-remove-btn" onclick="removeBatchItem(${idx})"><i class="fas fa-trash"></i></button>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  function viewBatchResult(idx) {
+    const it = batchFiles[idx];
+    if (!it || it.status !== 'success') return;
+    showResult(it.result, 'batchResultSection');
+  }
+
+  async function runBatchDetection() {
+    const pending = batchFiles.filter(it => it.status === 'pending' || it.status === 'failed');
+    if (!pending.length) return;
+
+    document.getElementById('batchDetectBtn').disabled = true;
+    document.getElementById('batchProgressWrap').style.display = 'block';
+
+    let done = 0;
+    const total = pending.length;
+
+    for (const it of pending) {
+      it.status = 'running';
+      renderBatchList();
+      const pct = Math.round((done/total)*100);
+      document.getElementById('batchProgressFill').style.width = pct + '%';
+      document.getElementById('batchProgressText').textContent =
+        t('pred_batch_progress').replace('{current}', done+1).replace('{total}', total);
+
+      try {
+        const data = await predictOne(it.file);
+        it.status = 'success';
+        it.result = data;
+      } catch (err) {
+        it.status = 'failed';
+        it.error = err.message || t('pred_detection_failed');
+      }
+
+      done++;
+      renderBatchList();
+    }
+
+    document.getElementById('batchProgressFill').style.width = '100%';
+    const successCount = batchFiles.filter(it => it.status === 'success').length;
+    const failedCount = batchFiles.filter(it => it.status === 'failed').length;
+    document.getElementById('batchProgressText').textContent =
+      t('pred_batch_done').replace('{success}', successCount).replace('{failed}', failedCount);
+
+    document.getElementById('batchDetectBtn').disabled = false;
+  }
+
+  // Initial empty-state render for the batch list
+  renderBatchList();
+
+  // ---------- Hamburger menu ----------
+  const mb = document.getElementById('menuBtn'), dm = document.getElementById('dropMenu');
+  mb.addEventListener('click', e=>{e.stopPropagation();dm.classList.toggle('show');});
+  document.addEventListener('click', ()=>dm.classList.remove('show'));
+</script>
+</body>
+</html>

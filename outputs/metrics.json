@@ -1,0 +1,10 @@
+{
+  "root": {
+    "accuracy": 0.9850842463861523,
+    "macro_precision": 0.9789269347829489,
+    "macro_recall": 0.98124672200456,
+    "macro_f1": 0.9797567968490133,
+    "num_classes": 38,
+    "best_val_epoch": 30
+  }
+}

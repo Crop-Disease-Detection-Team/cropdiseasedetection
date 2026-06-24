@@ -298,6 +298,11 @@
       display: block;
     }
     
+    /* ===== FIX: Hide the browser's native password reveal button ===== */
+    input[type="password"]::-webkit-reveal {
+      display: none;
+    }
+    
     @media (max-width: 520px) {
       .card-head { padding: 1.5rem; }
       .card-body { padding: 1.5rem; }
@@ -467,6 +472,22 @@
       window.addEventListener('languageChanged', updateLangButtonText);
     } else {
       console.error('shared.js not loaded! Check path: /statics/js/shared.js');
+    }
+
+    // ===== FIX: Clear form fields if no active session =====
+    // This removes any stale autofill values after logout.
+    if (!localStorage.getItem('access_token')) {
+      document.getElementById('email').value = '';
+      document.getElementById('password').value = '';
+      const alert = document.getElementById('alertMsg');
+      if (alert) {
+        alert.className = 'alert';
+        alert.style.display = 'none';
+        alert.textContent = '';
+      }
+      // Clear any error messages as well
+      document.getElementById('emailErr').textContent = '';
+      document.getElementById('pwErr').textContent = '';
     }
   });
 </script>

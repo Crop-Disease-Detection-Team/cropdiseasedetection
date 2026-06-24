@@ -1,579 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>Disease Detail — Crop Disease AI | Nepal</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verify Email — Crop Disease AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/statics/css/style.css">
   <style>
-    /* ========== SAME COLORS AS USER-DASHBOARD / HISTORY / PREDICT ========== */
-    :root {
-      --green-dark: #0f2b14;
-      --green-primary: #2c6e2f;
-      --green-light: #4c9a4a;
-      --cream-bg: #FDF9F0;
-      --sand: #e9e0d3;
-      --stone: #5e4b3c;
-      --gray-soft: #f5f2ec;
-      --shadow-sm: 0 8px 20px rgba(0,0,0,0.03), 0 2px 6px rgba(0,0,0,0.05);
-      --shadow-md: 0 4px 20px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
-      --transition: all 0.2s ease;
-      --radius-xl: 24px;
-      --radius-md: 12px;
-      --radius-sm: 8px;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--cream-bg);
-      color: var(--stone);
-      min-height: 100vh;
-    }
-
-    body.np-font { font-family: 'Noto Sans Devanagari', sans-serif; }
-
-    /* Language toggle — docked inline in navbar, never position:fixed.
-       Same overlap-safe pattern as every other page in this project. */
-    .lang-switch-inline {
-      background: var(--gray-soft);
-      border-radius: 60px;
-      padding: 6px 12px;
-      font-size: 0.72rem;
-      font-weight: 600;
-      border: 1px solid var(--sand);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-      color: var(--stone);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .lang-switch-inline:hover { background: var(--sand); }
-    .lang-switch-inline svg { width: 14px; height: 14px; color: var(--green-primary); flex-shrink: 0; }
-
-    /* Navbar */
-    .navbar {
-      background: white;
-      padding: 0.75rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid var(--sand);
-      position: sticky;
-      top: 0;
-      z-index: 99;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-
-    .logo { font-size: 1.1rem; font-weight: 800; color: var(--green-primary); flex-shrink: 0; }
-
-    /* Right-hand cluster: lang toggle + back link + fav button.
-       flex-wrap:nowrap so they stay on one line and never stack on
-       each other the way position:fixed toggles used to. */
-    .navbar-right {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      flex-wrap: nowrap;
-      flex-shrink: 0;
-    }
-
-    .navbar-right a {
-      color: var(--stone);
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 0.85rem;
-      transition: var(--transition);
-      white-space: nowrap;
-    }
-    .navbar-right a:hover { color: var(--green-primary); }
-
-    .container { max-width: 1000px; margin: 2rem auto; padding: 0 1.5rem 3rem; }
-
-    /* ── Hero image box fix ──────────────────────────────────────────────
-       Old code had only max-height + min-height on the container and
-       object-fit:contain on the img with no fixed height — the actual
-       rendered height was content-driven, so portrait/landscape images
-       gave wildly different box heights and the placeholder only filled
-       gaps. Fixed by giving a real fixed height to the container so the
-       box is always a consistent, predictable rectangle. The image is
-       centered and cropped to fill it (object-fit:cover) while the
-       no-image fallback fills the same space cleanly. ──────────────── */
-    .hero-img-container {
-      width: 100%;
-      height: 320px;
-      background: var(--gray-soft);
-      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .hero-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-      display: block;
-    }
-
-    .no-image {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.6rem;
-      color: var(--stone);
-      opacity: 0.5;
-      text-align: center;
-      padding: 2rem;
-      width: 100%;
-      height: 100%;
-    }
-    .no-image i { font-size: 2.5rem; }
-    .no-image span { font-size: 0.85rem; }
-
-    .card {
-      background: white;
-      border-radius: var(--radius-xl);
-      box-shadow: var(--shadow-sm);
-      overflow: hidden;
-      margin-bottom: 1.5rem;
-      border: 1px solid var(--sand);
-    }
-
-    .card-body { padding: 1.5rem; }
-
-    /* Badges */
-    .badge {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 50px;
-      font-size: 0.7rem;
-      font-weight: 600;
-    }
-    .badge-info { background: #e8f0fe; color: #1a5b8d; }
-    .badge-critical { background: #fef2f2; color: #991b1b; }
-    .badge-high { background: #fff7ed; color: #c2410c; }
-    .badge-medium { background: #fefce8; color: #854d0e; }
-    .badge-low { background: #f0fdf4; color: #166534; }
-
-    /* Tabs — no emojis, matching dashboard style */
-    .tab-nav {
-      display: flex;
-      gap: 4px;
-      border-bottom: 1px solid var(--sand);
-      padding: 0 1.5rem;
-      background: white;
-      flex-wrap: wrap;
-    }
-
-    .tab-btn {
-      padding: 0.75rem 1.25rem;
-      background: none;
-      border: none;
-      font-weight: 600;
-      font-size: 0.85rem;
-      color: var(--stone);
-      opacity: 0.6;
-      cursor: pointer;
-      transition: var(--transition);
-      border-bottom: 2px solid transparent;
-      white-space: nowrap;
-    }
-    .tab-btn.active { opacity: 1; color: var(--green-primary); border-bottom-color: var(--green-primary); }
-    .tab-btn:hover { color: var(--green-primary); opacity: 1; }
-
-    /* Info sections */
-    .info-section { margin-bottom: 1.5rem; }
-    .info-label {
-      font-size: 0.7rem;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      color: var(--stone);
-      opacity: 0.6;
-      margin-bottom: 0.35rem;
-      font-weight: 700;
-    }
-    .info-value { font-size: 0.92rem; color: var(--stone); line-height: 1.7; }
-
-    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-
-    /* Medicine cards */
-    .med-card {
-      background: var(--gray-soft);
-      border-radius: var(--radius-md);
-      padding: 1rem;
-      border: 1px solid var(--sand);
-    }
-    .med-name { font-weight: 800; color: var(--green-primary); margin-bottom: 0.4rem; font-size: 0.9rem; }
-    .med-row {
-      font-size: 0.75rem;
-      color: var(--stone);
-      margin: 0.2rem 0;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      opacity: 0.8;
-    }
-
-    /* Buttons */
-    .btn {
-      padding: 10px 20px;
-      border-radius: var(--radius-md);
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.85rem;
-      text-decoration: none;
-    }
-    .btn-sm { padding: 6px 14px; font-size: 0.75rem; }
-    .btn-primary { background: var(--green-primary); color: white; }
-    .btn-primary:hover { background: #1f5922; transform: translateY(-1px); }
-    .btn-secondary { background: var(--gray-soft); color: var(--stone); border: 1px solid var(--sand); }
-    .btn-secondary:hover { background: var(--sand); }
-
-    /* Loading / alert / not-found */
-    .loading-overlay {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 4rem;
-    }
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid var(--sand);
-      border-top-color: var(--green-primary);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-txt { margin-top: 1rem; color: var(--stone); font-size: 0.88rem; }
-
-    .alert {
-      padding: 12px 16px;
-      border-radius: var(--radius-md);
-      margin-bottom: 1rem;
-      font-size: 0.8rem;
-      display: none;
-    }
-    .alert.success { background: #e8f5e9; border-left: 4px solid var(--green-primary); color: #1e4620; display: block; }
-    .alert.error { background: #fef2f2; border-left: 4px solid #dc2626; color: #991b1b; display: block; }
-
-    .not-found {
-      text-align: center;
-      padding: 4rem;
-      color: var(--stone);
-    }
-    .not-found i { font-size: 2.5rem; opacity: 0.4; display: block; margin-bottom: 1rem; }
-
-    .action-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1.25rem; }
-
-    @media (max-width: 640px) {
-      .grid-2 { grid-template-columns: 1fr; }
-      .tab-btn { padding: 0.5rem 0.9rem; font-size: 0.78rem; }
-      .navbar { padding: 0.6rem 1rem; }
-      .container { padding: 0 1rem 2rem; }
-      .hero-img-container { height: 220px; }
-      .lang-switch-inline span { display: none; }
-      .lang-switch-inline { padding: 6px 8px; }
-    }
+    body{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f1f12,#1a3520);padding:1.5rem;}
+    .card{width:100%;max-width:420px;background:#fff;border-radius:28px;box-shadow:0 32px 60px rgba(0,0,0,.4);overflow:hidden;}
+    .card-head{background:linear-gradient(145deg,#1a3520,#0f2814);padding:2rem;text-align:center;color:#fff;}
+    .card-body{padding:2rem;}
   </style>
 </head>
 <body>
-
-<nav class="navbar">
-  <div class="logo">🌾 CropDisease AI</div>
-  <div class="navbar-right">
-    <!-- Language toggle — inline, never position:fixed, cannot overlap fav button -->
-    <div class="lang-switch-inline" id="langToggle">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/>
-        <path d="M22 22l-5-10-5 10"/><path d="M14 18h6"/>
-      </svg>
-      <span id="langBtnText">नेपाली</span>
+<div class="card">
+  <div class="card-head"><div style="font-size:2.5rem;margin-bottom:.5rem;">📧</div><h1 style="font-size:1.4rem;font-weight:700;">Verify Your Email</h1><p style="opacity:.7;font-size:.85rem;margin-top:.2rem;" id="headSub">Enter the 6-digit code we sent you</p></div>
+  <div class="card-body">
+    <div id="alertMsg" class="alert"></div>
+    <p style="font-size:.88rem;color:var(--gray-500);text-align:center;margin-bottom:1rem;">Code sent to <strong id="emailDisplay">your email</strong></p>
+    <div class="otp-group">
+      <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
+      <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
+      <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
+      <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
+      <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
+      <input type="text" class="otp-box" maxlength="1" inputmode="numeric">
     </div>
-    <a href="/user-dashboard" id="backLink">← <span data-lang-key="dd_back_dashboard">Back to Dashboard</span></a>
-    <button class="btn btn-secondary btn-sm" id="favBtn" onclick="toggleFav()">
-      <i class="far fa-heart"></i> <span id="favText" data-lang-key="dd_save">Save</span>
-    </button>
-  </div>
-</nav>
-
-<div class="container">
-  <div id="alertMsg" class="alert"></div>
-
-  <div class="loading-overlay" id="loader">
-    <div class="spinner"></div>
-    <div class="loading-txt" data-lang-key="dd_loading">Loading disease details...</div>
-  </div>
-
-  <div id="content" style="display:none;">
-    <div class="card">
-      <!-- Hero image: fixed 320px height, consistent regardless of image ratio -->
-      <div id="heroImageContainer" class="hero-img-container"></div>
-      <div class="card-body">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
-          <div>
-            <h1 id="diseaseName" style="font-size:1.6rem;font-weight:800;color:var(--green-primary);margin-bottom:0.4rem;"></h1>
-            <div id="sciName" style="font-size:0.88rem;color:var(--stone);opacity:.75;font-style:italic;margin-bottom:0.6rem;"></div>
-            <div id="tagRow" style="display:flex;gap:0.5rem;flex-wrap:wrap;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="tab-nav">
-        <button class="tab-btn active" onclick="showTab(0)" data-lang-key="dd_tab_overview">Overview</button>
-        <button class="tab-btn" onclick="showTab(1)" data-lang-key="dd_tab_treatment">Treatment</button>
-        <button class="tab-btn" onclick="showTab(2)" data-lang-key="dd_tab_medicines">Medicines</button>
-      </div>
-
-      <div class="card-body">
-        <div id="tab0">
-          <div class="info-section"><div class="info-label" data-lang-key="dd_description">Description</div><div class="info-value" id="dDesc"></div></div>
-          <div class="info-section"><div class="info-label" data-lang-key="dd_symptoms">Symptoms</div><div class="info-value" id="dSymp"></div></div>
-          <div class="info-section"><div class="info-label" data-lang-key="dd_causes">Causes</div><div class="info-value" id="dCause"></div></div>
-          <div class="grid-2">
-            <div class="info-section"><div class="info-label" data-lang-key="dd_affected_parts">Affected Parts</div><div class="info-value" id="dParts"></div></div>
-            <div class="info-section"><div class="info-label" data-lang-key="dd_typical_duration">Typical Duration</div><div class="info-value" id="dDur"></div></div>
-            <div class="info-section"><div class="info-label" data-lang-key="dd_cultivation_regions">Cultivation Regions</div><div class="info-value" id="dRegions"></div></div>
-          </div>
-        </div>
-
-        <div id="tab1" style="display:none;">
-          <div class="info-section"><div class="info-label" data-lang-key="dd_organic_treatment">Organic Treatment</div><div class="info-value" id="dOrganic"></div></div>
-          <div class="info-section"><div class="info-label" data-lang-key="dd_chemical_treatment">Chemical Treatment</div><div class="info-value" id="dChem"></div></div>
-          <div class="info-section"><div class="info-label" data-lang-key="dd_prevention_tips">Prevention Tips</div><div class="info-value" id="dPrev"></div></div>
-        </div>
-
-        <div id="tab2" style="display:none;">
-          <div id="medGrid" class="grid-2" style="gap:1rem;"></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="action-buttons">
-      <a href="/predict" class="btn btn-primary"><i class="fas fa-camera"></i> <span data-lang-key="dd_scan_crop">Scan Your Crop</span></a>
-      <a href="/user-dashboard" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> <span data-lang-key="dd_back_dashboard">Back to Dashboard</span></a>
-    </div>
-  </div>
-
-  <div id="notFound" class="not-found" style="display:none;">
-    <i class="fas fa-exclamation-circle"></i>
-    <p data-lang-key="dd_not_found_title">Disease not found.</p>
-    <a href="/user-dashboard" style="color:var(--green-primary);margin-top:1rem;display:inline-block;">
-      <i class="fas fa-arrow-left"></i> <span data-lang-key="dd_back_dashboard">Back to Dashboard</span>
-    </a>
+    <div id="timerTxt" style="text-align:center;font-size:.78rem;color:var(--gray-500);margin:.75rem 0;"></div>
+    <button class="btn btn-primary btn-full" id="verBtn" onclick="verify()">Verify Email</button>
+    <button class="btn btn-secondary btn-full" style="margin-top:8px;" onclick="resend()">Resend Code</button>
+    <div style="text-align:center;margin-top:1.25rem;font-size:.82rem;color:var(--gray-500);"><a href="/login" style="color:var(--green-700);font-weight:600;">← Back to Login</a></div>
   </div>
 </div>
-
 <script src="/statics/js/auth.js"></script>
-<script src="/statics/js/shared.js"></script>
 <script>
-  requireAuth('user');
+  const params=new URLSearchParams(location.search);
+  const email=(params.get('email')||'').toLowerCase();
+  if(email) document.getElementById('emailDisplay').textContent=email;
+  const digits=Array.from(document.querySelectorAll('.otp-box'));
+  let timerInt=null;
 
-  // ---------- Language toggle ----------
-  document.getElementById('langToggle').addEventListener('click', () => {
-    if (typeof window.LangManager !== 'undefined') {
-      const newLang = window.LangManager.currentLang === 'en' ? 'np' : 'en';
-      window.LangManager.setLanguage(newLang);
-    }
+  digits.forEach((d,i)=>{
+    d.addEventListener('input',e=>{const v=e.target.value.replace(/\D/g,'');e.target.value=v;if(v&&i<digits.length-1)digits[i+1].focus();});
+    d.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!d.value&&i>0)digits[i-1].focus();});
+    d.addEventListener('paste',e=>{e.preventDefault();const p=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'');p.split('').forEach((ch,j)=>{if(digits[i+j])digits[i+j].value=ch;});});
   });
 
-  function updateLangButtonText() {
-    const btnText = document.getElementById('langBtnText');
-    if (btnText && typeof window.LangManager !== 'undefined') {
-      btnText.innerText = window.LangManager.currentLang === 'en' ? 'नेपाली' : 'English';
-    }
+  function startTimer(){
+    clearInterval(timerInt);let t=300;
+    const el=document.getElementById('timerTxt');
+    const tick=()=>{const m=Math.floor(t/60),s=t%60;el.textContent=`Expires in ${m}:${String(s).padStart(2,'0')}`;el.style.color=t<=30?'var(--red-600)':'var(--gray-500)';if(t--<=0){clearInterval(timerInt);el.textContent='Code expired — resend.';document.getElementById('verBtn').disabled=true;} };
+    tick();timerInt=setInterval(tick,1000);
+  }
+  startTimer();
+
+  async function verify(){
+    const code=digits.map(d=>d.value).join('');
+    if(code.length!==6){showAlert('alertMsg','Enter all 6 digits.','error');return;}
+    const res=await fetch('/api/auth/verify-email',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,otp:code})});
+    const d=await res.json();
+    if(res.ok){clearInterval(timerInt);showAlert('alertMsg','Email verified! Redirecting…','success');setTimeout(()=>window.location.href='/login',1800);}
+    else showAlert('alertMsg',d.error||'Verification failed.','error');
   }
 
-  // Re-render JS-built content (image error text, badges, med cards, fav
-  // button label) when language switches, since data-lang-key can't reach
-  // text baked into innerHTML template literals at render time.
-  window.addEventListener('langApplied', () => {
-    updateLangButtonText();
-    if (currentDisease) render(currentDisease);
-    updateFavBtn();
-  });
-
-  document.addEventListener('DOMContentLoaded', () => {
-    if (typeof window.LangManager !== 'undefined') setTimeout(updateLangButtonText, 100);
-  });
-
-  // ---------- Helpers ----------
-  function esc(str) {
-    if (!str) return '—';
-    const d = document.createElement('div');
-    d.textContent = str;
-    return d.innerHTML;
+  async function resend(){
+    if(!email){showAlert('alertMsg','No email found. Please register again.','error');return;}
+    const res=await fetch('/api/auth/resend-verification',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});
+    const d=await res.json();
+    if(res.ok){showAlert('alertMsg',d.message,'success');digits.forEach(d=>d.value='');digits[0].focus();document.getElementById('verBtn').disabled=false;startTimer();}
+    else showAlert('alertMsg',d.error||'Could not resend.','error');
   }
-  function fmt(str) { return str ? String(str).replace(/___/g,' — ').replace(/_/g,' ') : '—'; }
-
-  // ---------- State ----------
-  const qid = new URLSearchParams(location.search).get('id');
-  let diseaseId = null, isFav = false, currentDisease = null;
-  let activeTab = 0;
-
-  // ---------- Load ----------
-  async function load() {
-    if (!qid) {
-      document.getElementById('notFound').style.display = 'block';
-      document.getElementById('loader').style.display = 'none';
-      return;
-    }
-
-    document.getElementById('loader').style.display = 'flex';
-    document.getElementById('content').style.display = 'none';
-
-    try {
-      const res = await authFetch(`/api/disease/user/diseases/${qid}`);
-      if (!res.ok) throw new Error('Not found');
-      const d = await res.json();
-      diseaseId = d.id;
-      currentDisease = d;
-      render(d);
-      document.getElementById('loader').style.display = 'none';
-      document.getElementById('content').style.display = 'block';
-      await checkFav();
-    } catch {
-      document.getElementById('loader').style.display = 'none';
-      document.getElementById('notFound').style.display = 'block';
-    }
-  }
-
-  // ---------- Render ----------
-  function render(d) {
-    document.title = fmt(d.disease_name) + ' — Crop Disease AI';
-    document.getElementById('diseaseName').textContent = fmt(d.disease_name);
-    document.getElementById('sciName').textContent = d.scientific_name || '';
-
-    // Hero image — fixed-height container, consistent regardless of
-    // image aspect ratio. onerror falls back to a clean placeholder
-    // that fills the same space rather than collapsing it.
-    const imgContainer = document.getElementById('heroImageContainer');
-    const imageUrl = d.sample_image_url;
-    if (imageUrl && imageUrl.trim()) {
-      imgContainer.innerHTML = `<img src="${imageUrl}" class="hero-img" alt=""
-        onerror="this.parentElement.innerHTML='<div class=\\'no-image\\'><i class=\\'fas fa-leaf\\'></i><span>${esc(t('dd_no_image'))}</span></div>'">`;
-    } else {
-      imgContainer.innerHTML = `<div class="no-image"><i class="fas fa-leaf"></i><span>${esc(t('dd_no_image'))}</span></div>`;
-    }
-
-    // Severity badge
-    const severityMap = { critical:'badge-critical', high:'badge-high', medium:'badge-medium', low:'badge-low' };
-    const sevKey = (d.severity_level || 'medium').toLowerCase();
-    const sevClass = severityMap[sevKey] || 'badge-medium';
-    const sevLabelKey = { critical:'sev_critical', high:'sev_high', medium:'sev_medium', low:'sev_low' }[sevKey] || 'sev_medium';
-    document.getElementById('tagRow').innerHTML = `
-      <span class="badge badge-info">${esc(d.crop_type || t('dd_various'))}</span>
-      <span class="badge ${sevClass}">${esc(t(sevLabelKey))} ${esc(t('dd_severity_suffix'))}</span>
-    `;
-
-    // Info fields — fall back to translated "Not specified" string
-    const setText = (id, val) => {
-      const el = document.getElementById(id);
-      if (el) el.textContent = val && val.trim() ? fmt(val) : t('dd_not_specified');
-    };
-    setText('dDesc', d.description);
-    setText('dSymp', d.symptoms);
-    setText('dCause', d.causes);
-    setText('dParts', d.affected_crop_parts);
-    setText('dDur', d.typical_duration);
-    setText('dRegions', d.cultivation_regions);
-    setText('dOrganic', d.organic_treatment);
-    setText('dChem', d.chemical_treatment);
-    setText('dPrev', d.prevention_tips);
-
-    // Medicine cards
-    const meds = d.medicines || [];
-    const medGrid = document.getElementById('medGrid');
-    medGrid.innerHTML = meds.length ? meds.map(m => `
-      <div class="med-card">
-        <div class="med-name">${esc(m.medicine_name)}</div>
-        <div class="med-row"><i class="fas fa-flask"></i> ${esc(m.active_ingredient || '—')}</div>
-        <div class="med-row"><i class="fas fa-vial"></i> ${esc(m.dosage_per_liter || '—')}</div>
-        <div class="med-row"><i class="fas fa-spray-can"></i> ${esc(m.application_method || t('dd_spray'))}</div>
-        ${m.waiting_period_days ? `<div class="med-row"><i class="fas fa-clock"></i> ${m.waiting_period_days} ${esc(t('dd_pre_harvest'))}</div>` : ''}
-        ${m.is_organic ? `<span class="badge badge-low" style="margin-top:6px;">${esc(t('dd_organic_label'))}</span>` : ''}
-      </div>`).join('')
-      : `<p style="color:var(--stone);opacity:.7;grid-column:1/-1;">${esc(t('dd_no_medicines'))}</p>`;
-
-    // Re-apply the currently active tab after re-render
-    showTab(activeTab, false);
-  }
-
-  // ---------- Tabs ----------
-  function showTab(index, remember = true) {
-    if (remember) activeTab = index;
-    ['tab0','tab1','tab2'].forEach((id, i) => {
-      const el = document.getElementById(id);
-      if (el) el.style.display = i === index ? 'block' : 'none';
-    });
-    document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i === index));
-  }
-
-  // ---------- Favourites ----------
-  async function checkFav() {
-    try {
-      const res = await authFetch('/api/user/favorites');
-      if (!res.ok) return;
-      const data = await res.json();
-      isFav = (data.favorites || []).some(f => f.disease && f.disease.id === diseaseId);
-      updateFavBtn();
-    } catch(e) { console.error(e); }
-  }
-
-  function updateFavBtn() {
-    const btn = document.getElementById('favBtn');
-    const span = document.getElementById('favText');
-    if (!btn || !span) return;
-    if (isFav) {
-      btn.className = 'btn btn-primary btn-sm';
-      btn.innerHTML = `<i class="fas fa-heart"></i> <span id="favText">${esc(t('dd_saved'))}</span>`;
-    } else {
-      btn.className = 'btn btn-secondary btn-sm';
-      btn.innerHTML = `<i class="far fa-heart"></i> <span id="favText">${esc(t('dd_save'))}</span>`;
-    }
-  }
-
-  async function toggleFav() {
-    const method = isFav ? 'DELETE' : 'POST';
-    try {
-      const res = await authFetch(`/api/user/favorites/${diseaseId}`, { method });
-      if (res.ok) {
-        isFav = !isFav;
-        updateFavBtn();
-        showAlert('alertMsg', isFav ? t('dd_saved_to_favorites') : t('dd_removed_from_favorites'), 'success');
-      }
-    } catch(e) { console.error(e); }
-  }
-
-  function showAlert(id, msg, type) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    el.className = `alert ${type}`;
-    el.textContent = msg;
-    el.style.display = 'block';
-    setTimeout(() => { if (el) el.style.display = 'none'; }, 4000);
-  }
-
-  load();
 </script>
-</body>
-</html>
+</body></html>

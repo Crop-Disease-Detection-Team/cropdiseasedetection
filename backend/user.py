@@ -6,7 +6,6 @@ import os
 import uuid
 import logging
 
-# Import the predictor
 from ml_model import get_predictor
 
 user_bp = Blueprint('user', __name__)
@@ -57,38 +56,33 @@ def get_disease_detail(disease_id):
 def predict():
     try:
         user_id = get_jwt_identity()
-        
+
         if 'image' not in request.files:
             return jsonify({'error': 'No image provided'}), 400
-        
+
         file = request.files['image']
         if file.filename == '':
             return jsonify({'error': 'No file selected'}), 400
-        
-        # Read image bytes
+
         image_bytes = file.read()
-        
-        # Get predictor and make prediction
+
         predictor = get_predictor()
         predictions = predictor.predict(image_bytes)
-        
+
         if not predictions:
             return jsonify({'error': 'Prediction failed'}), 500
-        
+
         top_prediction = predictions[0]
-        
-        # Save image
+
         filename = f"{uuid.uuid4().hex}.jpg"
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         file.seek(0)
         file.save(filepath)
-        
-        # Get disease info from database
+
         disease_info = Disease.query.filter_by(
             disease_name=top_prediction['disease_name']
         ).first()
-        
-        # Save to scan history
+
         scan = ScanHistory(
             user_id=user_id,
             image_filename=filename,
@@ -100,7 +94,7 @@ def predict():
         )
         db.session.add(scan)
         db.session.commit()
-        
+
         return jsonify({
             'scan_id': scan.id,
             'disease': top_prediction['disease_name'],
@@ -110,7 +104,7 @@ def predict():
             'symptoms': disease_info.symptoms if disease_info else 'Check leaves for unusual spots',
             'description': disease_info.description if disease_info else 'No description available'
         }), 200
-        
+
     except Exception as e:
         logger.error(f"Prediction error: {str(e)}")
         import traceback
@@ -128,18 +122,18 @@ def get_history():
         user_id = get_jwt_identity()
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 20, type=int)
-        
+
         scans = ScanHistory.query.filter_by(user_id=user_id)\
             .order_by(ScanHistory.scanned_at.desc())\
             .paginate(page=page, per_page=per_page, error_out=False)
-        
+
         return jsonify({
             'scans': [scan.to_dict() for scan in scans.items],
             'total': scans.total,
             'page': page,
             'pages': scans.pages
         }), 200
-        
+
     except Exception as e:
         logger.error(f"Get history error: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
@@ -153,20 +147,20 @@ def get_history():
 def get_statistics():
     try:
         user_id = get_jwt_identity()
-        
+
         total_scans = ScanHistory.query.filter_by(user_id=user_id).count()
         favorites_count = UserFavorite.query.filter_by(user_id=user_id).count()
-        
+
         avg_confidence = db.session.query(
             db.func.avg(ScanHistory.confidence)
         ).filter_by(user_id=user_id).scalar()
-        
+
         return jsonify({
             'total_scans': total_scans,
             'favorites_count': favorites_count,
             'average_confidence': round(float(avg_confidence), 2) if avg_confidence else 0
         }), 200
-        
+
     except Exception as e:
         logger.error(f"Get statistics error: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
@@ -193,18 +187,18 @@ def get_favorites():
 def add_favorite(disease_id):
     try:
         user_id = get_jwt_identity()
-        
+
         existing = UserFavorite.query.filter_by(
             user_id=user_id, disease_id=disease_id
         ).first()
-        
+
         if existing:
             return jsonify({'message': 'Already in favorites'}), 200
-        
+
         favorite = UserFavorite(user_id=user_id, disease_id=disease_id)
         db.session.add(favorite)
         db.session.commit()
-        
+
         return jsonify({'message': 'Added to favorites'}), 201
     except Exception as e:
         logger.error(f"Add favorite error: {str(e)}")
@@ -216,24 +210,25 @@ def add_favorite(disease_id):
 def remove_favorite(disease_id):
     try:
         user_id = get_jwt_identity()
-        
+
         favorite = UserFavorite.query.filter_by(
             user_id=user_id, disease_id=disease_id
         ).first()
-        
+
         if not favorite:
             return jsonify({'error': 'Not in favorites'}), 404
-        
+
         db.session.delete(favorite)
         db.session.commit()
-        
+
         return jsonify({'message': 'Removed from favorites'}), 200
     except Exception as e:
         logger.error(f"Remove favorite error: {str(e)}")
         db.session.rollback()
         return jsonify({'error': 'Internal server error'}), 500
+
 # ============================================
-# DELETE ALL SCAN HISTORY FOR CURRENT USER
+# DELETE ALL SCAN HISTORY
 # ============================================
 
 @user_bp.route('/history', methods=['DELETE'])
@@ -248,3 +243,31 @@ def delete_all_history():
         db.session.rollback()
         logger.error(f"Delete history error: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
+
+# ============================================
+# GET USER SCANS (for dashboard recent scans)
+# FIX: removed duplicate route that was in auth.py
+# ============================================
+
+@user_bp.route('/scans', methods=['GET'])
+@jwt_required()
+def get_user_scans():
+    try:
+        user_id = get_jwt_identity()
+        scans = ScanHistory.query.filter_by(user_id=user_id).order_by(
+            ScanHistory.scanned_at.desc()
+        ).all()
+        return jsonify({
+            'scans': [{
+                'id': s.id,
+                'disease_name': s.disease_name,
+                'confidence': s.confidence,
+                'severity': s.severity if hasattr(s, 'severity') else 'medium',
+                'scanned_at': s.scanned_at.isoformat() if s.scanned_at else None,
+                'image_path': s.image_path
+            } for s in scans],
+            'total': len(scans)
+        }), 200
+    except Exception as e:
+        logger.error(f"Get user scans error: {str(e)}")
+        return jsonify({'error': str(e)}), 500

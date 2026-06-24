@@ -1516,4 +1516,233 @@ After successful submission, the frontend should display a confirmation message 
 
 bikram204@gmail.com
 
+# Crop Disease Detection System
+
+## Overview
+
+Crop Disease Detection System is a web-based application that uses Deep Learning to identify crop diseases from leaf images. The system provides disease predictions, confidence scores, disease descriptions, symptoms, and treatment recommendations.
+
+## Features
+
+* Deep Learning-based crop disease classification
+* User Authentication (Register/Login/OTP Verification)
+* Disease Information and Recommendations
+* Prediction History
+* Admin Dashboard
+* MySQL Database Integration
+* Mobile App Support
+
+---
+
+## Project Structure
+
+```text
+crop-disease-detector/
+│
+├── backend/
+│   ├── app.py
+│   ├── auth.py
+│   ├── disease.py
+│   ├── predict.py
+│   ├── user.py
+│   ├── config.py
+│   ├── models.py
+│   ├── requirements.txt
+│   ├── static/
+│   └── uploads/
+│
+├── templates/
+├── statics/
+├── mobile-app/
+├── database/
+│   └── schema.sql
+│
+├── train_model.py
+├── requirements.txt
+└── README.md
+```
+
+---
+
+# Model Download
+
+The trained model file is not included in this repository because GitHub limits files larger than 100 MB.
+
+Download the trained model from Kaggle:
+
+Model Link:
+
+https://www.kaggle.com/code/bikramchapagain/projectmodel2
+
+After downloading:
+
+1. Extract the model file.
+2. Place the model inside:
+
+```text
+backend/models/
+```
+
+Example:
+
+```text
+backend/models/best_model.pth
+```
+
+---
+
+# Prerequisites
+
+* Python 3.10+
+* MySQL Server
+* Git
+
+---
+
+# Clone Repository
+
+```bash
+git clone https://github.com/Crop-Disease-Detection-Team/cropdiseasedetection.git
+
+cd cropdiseasedetection
+```
+
+---
+
+# Create Virtual Environment
+
+Windows
+
+```bash
+python -m venv venv
+
+venv\Scripts\activate
+```
+
+Linux/Mac
+
+```bash
+python3 -m venv venv
+
+source venv/bin/activate
+```
+
+---
+
+# Install Requirements
+
+```bash
+pip install --upgrade pip
+
+pip install -r requirements.txt
+```
+
+If backend requirements are separate:
+
+```bash
+pip install -r backend/requirements.txt
+```
+
+---
+
+# MySQL Database Setup
+
+Create Database
+
+```sql
+CREATE DATABASE crop_disease_db;
+```
+
+Import schema
+
+```bash
+mysql -u root -p crop_disease_db < database/schema.sql
+```
+
+Update database configuration inside:
+
+```text
+backend/config.py
+```
+
+Example:
+
+```python
+MYSQL_HOST = "localhost"
+MYSQL_USER = "root"
+MYSQL_PASSWORD = "your_password"
+MYSQL_DB = "crop_disease_db"
+```
+
+---
+
+# Environment Variables
+
+Create:
+
+```text
+backend/.env
+```
+
+Example:
+
+```env
+SECRET_KEY=your_secret_key
+
+MAIL_USERNAME=your_email
+
+MAIL_PASSWORD=your_app_password
+
+MYSQL_HOST=localhost
+
+MYSQL_USER=root
+
+MYSQL_PASSWORD=your_password
+
+MYSQL_DB=crop_disease_db
+```
+
+---
+
+# Run Application
+
+Navigate to backend directory:
+
+```bash
+cd backend
+```
+
+Start Flask server:
+
+```bash
+python app.py
+```
+
+Application will run on:
+
+```text
+http://127.0.0.1:5000
+```
+
+---
+
+# Training Your Own Model
+
+```bash
+python train_model.py
+```
+
+The trained model will be saved in:
+
+```text
+backend/models/
+```
+
+---
+
+# Contributors
+
+Crop Disease Detection Team
+
+Developed as a Deep Learning and Web-Based Agricultural Disease Detection System.
 

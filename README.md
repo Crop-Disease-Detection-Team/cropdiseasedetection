@@ -1746,3 +1746,5 @@ Crop Disease Detection Team
 
 Developed as a Deep Learning and Web-Based Agricultural Disease Detection System.
 
+# slide link for mid-defense 
+https://docs.google.com/presentation/d/1NlowN3MvluZCNVicqPOH2d_ZGhOeVHZQRwMQENxsivg/edit?usp=sharing

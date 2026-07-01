@@ -234,52 +234,196 @@
   <span id="apiStatus">Checking…</span>
 </div>
 
+<!-- ============================================ -->
+<!-- AUTH SCRIPTS - Load auth.js first            -->
+<!-- ============================================ -->
+<script src="/statics/js/auth.js"></script>
 <script src="/statics/js/shared.js"></script>
 
 <script>
-  function t(key) {
-    return window.LangManager ? window.LangManager.get(key) : key;
-  }
+  // ============================================================
+  // INDEX PAGE CONTROLLER - Auto-login & Session Management
+  // ============================================================
 
-  document.addEventListener('DOMContentLoaded', async () => {
-    if (typeof window.LangManager === 'undefined') {
-      console.error('shared.js not loaded! Check path: /statics/js/shared.js');
+  (function() {
+    'use strict';
+
+    // ----- Check for valid session and redirect if logged in -----
+    function checkAutoLogin() {
+      try {
+        const token = localStorage.getItem('access_token');
+        const userStr = localStorage.getItem('user');
+        
+        if (!token || !userStr) {
+          console.log('No session found - showing landing page');
+          return false;
+        }
+        
+        const user = JSON.parse(userStr);
+        if (!user || !user.role) {
+          console.log('Invalid user data - clearing');
+          clearAuth();
+          return false;
+        }
+        
+        // Check if token is valid (not expired)
+        try {
+          const parts = token.split('.');
+          if (parts.length !== 3) {
+            clearAuth();
+            return false;
+          }
+          const payload = JSON.parse(atob(parts[1]));
+          if (!payload || !payload.exp) {
+            clearAuth();
+            return false;
+          }
+          
+          const now = Math.floor(Date.now() / 1000);
+          if (payload.exp <= now) {
+            console.log('Session expired - clearing and showing landing page');
+            clearAuth();
+            return false;
+          }
+          
+          // Token is valid - redirect to dashboard
+          console.log('Valid session found - redirecting to dashboard');
+          const redirectUrl = user.role === 'admin' ? '/admin-dashboard' : '/user-dashboard';
+          window.location.href = redirectUrl;
+          return true;
+          
+        } catch (e) {
+          console.warn('Invalid token - clearing');
+          clearAuth();
+          return false;
+        }
+        
+      } catch (e) {
+        console.warn('Error checking session:', e);
+        clearAuth();
+        return false;
+      }
+    }
+
+    // ----- Run auto-login check immediately -----
+    // This runs before the page fully loads to prevent flash of content
+    if (document.readyState === 'loading') {
+      // If still loading, wait for DOM
+      document.addEventListener('DOMContentLoaded', function() {
+        checkAutoLogin();
+      });
     } else {
-      console.log('shared.js loaded successfully!');
+      // DOM already loaded, check immediately
+      checkAutoLogin();
     }
 
-    try {
-      const res = await fetch('/api/health');
-      const d = await res.json();
-      const statusSpan = document.getElementById('apiStatus');
-      if (statusSpan && window.LangManager) {
-        const isOnline = d.status === 'healthy';
-        statusSpan.textContent = isOnline ? window.LangManager.get('online') : window.LangManager.get('offline');
-      }
-    } catch (err) {
-      const statusSpan = document.getElementById('apiStatus');
-      if (statusSpan && window.LangManager) {
-        statusSpan.textContent = window.LangManager.get('offline');
-      }
+    // ----- Language toggle functions -----
+    function t(key) {
+      return window.LangManager ? window.LangManager.get(key) : key;
     }
-  });
 
-  window.addEventListener('langApplied', async () => {
-    try {
-      const res = await fetch('/api/health');
-      const d = await res.json();
-      const statusSpan = document.getElementById('apiStatus');
-      if (statusSpan && window.LangManager) {
-        const isOnline = d.status === 'healthy';
-        statusSpan.textContent = isOnline ? window.LangManager.get('online') : window.LangManager.get('offline');
+    // ----- API Status check -----
+    document.addEventListener('DOMContentLoaded', async function() {
+      // Update language button states
+      if (typeof window.LangManager !== 'undefined') {
+        console.log('shared.js loaded successfully!');
+        
+        // Set active language button
+        const currentLang = window.LangManager.currentLang || 'en';
+        document.querySelectorAll('[data-lang-btn]').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.langBtn === currentLang);
+        });
+      } else {
+        console.warn('shared.js not loaded! Check path: /statics/js/shared.js');
       }
-    } catch {
-      const statusSpan = document.getElementById('apiStatus');
-      if (statusSpan && window.LangManager) {
-        statusSpan.textContent = window.LangManager.get('offline');
+
+      // Check API status
+      try {
+        const res = await fetch('/api/health');
+        const d = await res.json();
+        const statusSpan = document.getElementById('apiStatus');
+        if (statusSpan && window.LangManager) {
+          const isOnline = d.status === 'healthy';
+          statusSpan.textContent = isOnline ? window.LangManager.get('online') : window.LangManager.get('offline');
+        } else if (statusSpan) {
+          statusSpan.textContent = d.status === 'healthy' ? '✅ Online' : '❌ Offline';
+        }
+      } catch (err) {
+        const statusSpan = document.getElementById('apiStatus');
+        if (statusSpan) {
+          statusSpan.textContent = '❌ Offline';
+        }
       }
-    }
-  });
+    });
+
+    // ----- Language change handler -----
+    window.setLanguage = function(lang) {
+      if (typeof window.LangManager !== 'undefined') {
+        window.LangManager.setLanguage(lang);
+        // Update active button
+        document.querySelectorAll('[data-lang-btn]').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.langBtn === lang);
+        });
+      }
+    };
+
+    // Listen for language changes
+    window.addEventListener('langApplied', async function() {
+      // Update active button
+      if (typeof window.LangManager !== 'undefined') {
+        const currentLang = window.LangManager.currentLang || 'en';
+        document.querySelectorAll('[data-lang-btn]').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.langBtn === currentLang);
+        });
+      }
+
+      // Update API status with new language
+      try {
+        const res = await fetch('/api/health');
+        const d = await res.json();
+        const statusSpan = document.getElementById('apiStatus');
+        if (statusSpan && window.LangManager) {
+          const isOnline = d.status === 'healthy';
+          statusSpan.textContent = isOnline ? window.LangManager.get('online') : window.LangManager.get('offline');
+        }
+      } catch {
+        const statusSpan = document.getElementById('apiStatus');
+        if (statusSpan && window.LangManager) {
+          statusSpan.textContent = window.LangManager.get('offline');
+        }
+      }
+    });
+
+    // ----- Session warning for logged-in users (silent check) -----
+    // This will check if user is logged in but on landing page (edge case)
+    // If logged in, redirect immediately
+    setTimeout(function() {
+      const token = localStorage.getItem('access_token');
+      const userStr = localStorage.getItem('user');
+      if (token && userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          if (user && user.role) {
+            // Check if token is still valid
+            const parts = token.split('.');
+            if (parts.length === 3) {
+              const payload = JSON.parse(atob(parts[1]));
+              if (payload && payload.exp) {
+                const now = Math.floor(Date.now() / 1000);
+                if (payload.exp > now) {
+                  // Still logged in but on landing page - redirect
+                  console.log('Session detected - redirecting to dashboard');
+                  const redirectUrl = user.role === 'admin' ? '/admin-dashboard' : '/user-dashboard';
+                  window.location.href = redirectUrl;
+                }
+              }
+            }
+          }
+        } catch (e) {}
+      }
+    }, 500); // Check after 500ms
+
+  })();
 </script>
 </body>
 </html>

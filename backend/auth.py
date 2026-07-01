@@ -14,7 +14,7 @@ from email.mime.multipart import MIMEMultipart
 import uuid
 import os
 from dotenv import load_dotenv
-from models import db, User, ScanHistory
+from werkzeug.utils import secure_filename
 
 # Load environment variables
 load_dotenv()
@@ -155,6 +155,14 @@ def validate_password(password):
     return len(errors) == 0, errors
 
 # ============================================
+# ALLOWED FILE EXTENSIONS FOR PROFILE PICS
+# ============================================
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# ============================================
 # REGISTER ENDPOINT
 # ============================================
 
@@ -224,7 +232,6 @@ def register():
         db.session.rollback()
         return jsonify({'error': 'Internal server error'}), 500
 
-
 # ============================================
 # VERIFY EMAIL
 # ============================================
@@ -266,7 +273,6 @@ def verify_email():
         print(f"Verification error: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
-
 # ============================================
 # RESEND VERIFICATION
 # ============================================
@@ -307,7 +313,6 @@ def resend_verification():
     except Exception as e:
         print(f"Resend error: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
-
 
 # ============================================
 # LOGIN ENDPOINT
@@ -352,6 +357,7 @@ def login():
         user.last_login = datetime.utcnow()
         db.session.commit()
 
+        # FIX: Use string identity, not int
         access_token = create_access_token(identity=str(user.id))
         refresh_token = create_refresh_token(identity=str(user.id))
 
@@ -366,28 +372,31 @@ def login():
         print(f"Login error: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
-
 # ============================================
-# LOGOUT ENDPOINT - FIXED get_jwt() import
+# LOGOUT ENDPOINT
 # ============================================
 
 @auth_bp.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
     try:
-        # FIX: use get_jwt() to get jti, not get_jti()
         jwt_data = get_jwt()
         jti = jwt_data.get('jti')
         if jti:
-            blacklisted = TokenBlacklist(jti=jti)
-            db.session.add(blacklisted)
-            db.session.commit()
+            # FIX: Check if TokenBlacklist table exists
+            try:
+                blacklisted = TokenBlacklist(jti=jti)
+                db.session.add(blacklisted)
+                db.session.commit()
+            except Exception as e:
+                print(f"TokenBlacklist error: {e}")
+                # If TokenBlacklist doesn't exist, just log the error
+                pass
         return jsonify({'message': 'Logged out successfully'}), 200
     except Exception as e:
         print(f"Logout error: {str(e)}")
         db.session.rollback()
         return jsonify({'error': 'Logout failed'}), 500
-
 
 # ============================================
 # FORGOT PASSWORD
@@ -433,7 +442,6 @@ def forgot_password():
         print(f"Forgot password error: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
-
 # ============================================
 # VERIFY RESET OTP
 # ============================================
@@ -467,7 +475,6 @@ def verify_reset_otp():
 
     except Exception as e:
         return jsonify({'error': 'Internal server error'}), 500
-
 
 # ============================================
 # RESET PASSWORD
@@ -506,9 +513,8 @@ def reset_password():
         db.session.rollback()
         return jsonify({'error': 'Internal server error'}), 500
 
-
 # ============================================
-# GET CURRENT USER
+# GET CURRENT USER - FIXED
 # ============================================
 
 @auth_bp.route('/me', methods=['GET'])
@@ -516,6 +522,7 @@ def reset_password():
 def get_current_user():
     try:
         user_id = get_jwt_identity()
+        # FIX: Convert to int properly
         user = User.query.get(int(user_id))
         if not user:
             return jsonify({'error': 'User not found'}), 404
@@ -523,7 +530,6 @@ def get_current_user():
     except Exception as e:
         print(f"Error in /me: {str(e)}")
         return jsonify({'error': str(e)}), 500
-
 
 # ============================================
 # CHANGE PASSWORD
@@ -556,7 +562,6 @@ def change_password():
         db.session.rollback()
         return jsonify({'error': 'Internal server error'}), 500
 
-
 # ============================================
 # REFRESH TOKEN
 # ============================================
@@ -566,11 +571,10 @@ def change_password():
 def refresh():
     try:
         user_id = get_jwt_identity()
-        new_token = create_access_token(identity=user_id)
+        new_token = create_access_token(identity=str(user_id))
         return jsonify({'access_token': new_token}), 200
     except Exception as e:
         return jsonify({'error': 'Invalid refresh token'}), 401
-
 
 # ============================================
 # UPDATE PROFILE
@@ -588,10 +592,13 @@ def update_profile():
 
         data = request.get_json()
 
-        if 'name' in data:
-            user.name = data['name']
-        if 'email' in data:
-            user.email = data['email']
+        if 'name' in data and data['name']:
+            user.name = data['name'].strip()
+        if 'email' in data and data['email']:
+            if validate_email(data['email']):
+                user.email = data['email'].lower().strip()
+            else:
+                return jsonify({'error': 'Invalid email format'}), 400
         if 'phone' in data:
             user.phone = data['phone']
         if 'address' in data:
@@ -607,9 +614,8 @@ def update_profile():
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-
 # ============================================
-# UPLOAD PROFILE PICTURE - FIXED: now returns user object
+# UPLOAD PROFILE PICTURE - FIXED
 # ============================================
 
 @auth_bp.route('/upload-profile-pic', methods=['POST'])
@@ -629,20 +635,27 @@ def upload_profile_pic():
         if file.filename == '':
             return jsonify({'error': 'No file selected'}), 400
 
+        # Validate file type
+        if not allowed_file(file.filename):
+            return jsonify({'error': 'Invalid file type. Allowed: png, jpg, jpeg, gif, webp'}), 400
+
+        # Secure the filename
+        filename = secure_filename(file.filename)
+        
         upload_dir = 'uploads/profiles'
         os.makedirs(upload_dir, exist_ok=True)
 
-        file_extension = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else 'jpg'
-        filename = f"profile_{user_id}_{uuid.uuid4().hex[:8]}.{file_extension}"
-        filepath = os.path.join(upload_dir, filename)
+        # Generate unique filename
+        file_extension = filename.rsplit('.', 1)[1].lower() if '.' in filename else 'jpg'
+        new_filename = f"profile_{user_id}_{uuid.uuid4().hex[:8]}.{file_extension}"
+        filepath = os.path.join(upload_dir, new_filename)
 
         file.save(filepath)
 
-        profile_url = f"/uploads/profiles/{filename}"
+        profile_url = f"/uploads/profiles/{new_filename}"
         user.profile_pic = profile_url
         db.session.commit()
 
-        # FIX: return full user object so frontend avatar updates correctly
         return jsonify({
             'message': 'Profile picture updated successfully',
             'profile_pic_url': profile_url,
@@ -653,3 +666,16 @@ def upload_profile_pic():
         print(f"Error uploading profile picture: {str(e)}")
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+# ============================================
+# HEALTH CHECK ENDPOINT - ADD THIS
+# ============================================
+
+@auth_bp.route('/health', methods=['GET'])
+def health_check():
+    """Simple health check endpoint"""
+    return jsonify({
+        'status': 'healthy',
+        'timestamp': datetime.utcnow().isoformat(),
+        'service': 'auth'
+    }), 200

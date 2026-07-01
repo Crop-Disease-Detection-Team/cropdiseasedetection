@@ -155,11 +155,12 @@
       color: #a2917c;
       font-size: 0.9rem;
       pointer-events: none;
+      z-index: 2;
     }
     
     .form-input {
       width: 100%;
-      padding: 12px 42px 12px 40px;
+      padding: 12px 50px 12px 40px;
       border: 1px solid #e2d9cf;
       border-radius: 18px;
       font-size: 0.9rem;
@@ -173,17 +174,66 @@
       box-shadow: 0 0 0 3px rgba(44,110,47,0.1);
     }
     
+    /* ===== COMPLETELY HIDE BROWSER'S NATIVE PASSWORD REVEAL ===== */
+    input[type="password"]::-webkit-reveal {
+      display: none !important;
+    }
+    
+    input[type="password"]::-moz-reveal {
+      display: none !important;
+    }
+    
+    input[type="password"]::-ms-reveal {
+      display: none !important;
+    }
+    
+    /* Hide all browser password controls */
+    input[type="password"]::-webkit-textfield-decoration-container {
+      display: none !important;
+    }
+    
+    input[type="password"]::-webkit-credentials-auto-fill-button,
+    input[type="password"]::-webkit-caps-lock-indicator,
+    input[type="password"]::-webkit-textfield-decoration-container {
+      display: none !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
+    
+    /* Custom password toggle button - ONLY ONE */
     .show-pw {
       position: absolute;
-      right: 16px;
+      right: 12px;
       background: none;
       border: none;
       cursor: pointer;
       color: #9b8b78;
+      z-index: 2;
+      padding: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
     }
     
     .show-pw:hover {
       color: var(--green-primary);
+      background: rgba(44, 110, 47, 0.08);
+    }
+    
+    .show-pw:active {
+      transform: scale(0.92);
+    }
+    
+    .show-pw:focus-visible {
+      outline: 2px solid var(--green-primary);
+      outline-offset: 2px;
     }
     
     .field-error {
@@ -236,6 +286,12 @@
       box-shadow: 0 8px 20px rgba(44,95,45,0.3);
     }
     
+    .btn-primary:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
     .divider {
       display: flex;
       align-items: center;
@@ -275,32 +331,36 @@
       margin-bottom: 1.2rem;
       font-size: 0.8rem;
       display: none;
+      align-items: center;
+      gap: 8px;
     }
     
-    .alert.success {
+    .alert.show {
+      display: flex !important;
+    }
+    
+    .alert-success {
       background: #e5f5e1;
       border-left: 5px solid var(--green-primary);
       color: #1d4820;
-      display: block;
     }
     
-    .alert.error {
+    .alert-error {
       background: #ffe6e4;
       border-left: 5px solid #d9534f;
       color: #a6241f;
-      display: block;
     }
     
-    .alert.warning {
+    .alert-warning {
       background: #fff3e0;
       border-left: 5px solid #f0ad4e;
       color: #856404;
-      display: block;
     }
     
-    /* ===== FIX: Hide the browser's native password reveal button ===== */
-    input[type="password"]::-webkit-reveal {
-      display: none;
+    .alert-info {
+      background: #e3f0ff;
+      border-left: 5px solid #5b9bd5;
+      color: #1e4e79;
     }
     
     @media (max-width: 520px) {
@@ -310,6 +370,8 @@
       .logo-wrapper { width: 52px; height: 52px; }
       .logo-wrapper svg { width: 28px; height: 28px; }
       .card-head h1 { font-size: 1.4rem; }
+      .form-input { padding: 10px 45px 10px 35px; }
+      .show-pw { width: 32px; height: 32px; right: 8px; }
     }
   </style>
 </head>
@@ -356,8 +418,10 @@
         <label class="form-label" data-lang-key="password_label">पासवर्ड</label>
         <div class="input-wrap">
           <i class="fas fa-lock ico"></i>
-          <input type="password" id="password" class="form-input" data-lang-placeholder="password_placeholder" placeholder="तपाईंको पासवर्ड" autocomplete="current-password">
-          <button type="button" class="show-pw" onclick="togglePw()"><i id="pwIcon" class="fas fa-eye"></i></button>
+          <input type="password" id="password" class="form-input" data-lang-placeholder="password_placeholder" placeholder="तपाईंको पासवर्ड" autocomplete="off">
+          <button type="button" class="show-pw" id="togglePwBtn" onclick="togglePw(event)">
+            <i id="pwIcon" class="fas fa-eye"></i>
+          </button>
         </div>
         <div class="field-error" id="pwErr"></div>
       </div>
@@ -385,111 +449,242 @@
 <script src="/statics/js/shared.js"></script>
 
 <script>
-  // auth.js's redirectIfLoggedIn() reads the same localStorage keys
-  // and routes by role — use it instead of a local duplicate.
-  redirectIfLoggedIn();
+  // ============================================================
+  // LOGIN PAGE CONTROLLER - FIXED VERSION
+  // ============================================================
 
-  function togglePw() {
-    const f = document.getElementById('password');
-    const i = document.getElementById('pwIcon');
-    f.type = f.type === 'password' ? 'text' : 'password';
-    i.className = f.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-  }
+  (function() {
+    'use strict';
 
-  document.getElementById('langToggle').addEventListener('click', () => {
-    if (typeof window.LangManager !== 'undefined') {
-      const newLang = window.LangManager.currentLang === 'en' ? 'np' : 'en';
-      window.LangManager.setLanguage(newLang);
-    }
-  });
-
-  function updateLangButtonText() {
-    const btnText = document.getElementById('langBtnText');
-    if (btnText && typeof window.LangManager !== 'undefined') {
-      btnText.innerText = window.LangManager.currentLang === 'en' ? 'नेपाली' : 'English';
-    }
-  }
-
-  document.getElementById('loginForm').addEventListener('submit', async e => {
-    e.preventDefault();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    const isEn = window.LangManager && window.LangManager.currentLang === 'en';
-    
-    document.getElementById('emailErr').textContent = '';
-    document.getElementById('pwErr').textContent = '';
-
-    if (!email) { 
-      document.getElementById('emailErr').textContent = isEn ? 'Email is required' : 'इमेल आवश्यक छ'; 
-      return; 
-    }
-    if (!password) { 
-      document.getElementById('pwErr').textContent = isEn ? 'Password is required' : 'पासवर्ड आवश्यक छ'; 
-      return; 
-    }
-
-    const btn = document.getElementById('loginBtn');
-    const btnSpan = btn.querySelector('span');
-    const originalText = btnSpan.textContent;
-    btn.disabled = true; 
-    btnSpan.textContent = isEn ? 'Signing in...' : 'साइन इन हुँदैछ...';
-
-    try {
-      const res = await fetch('/api/auth/login', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        localStorage.setItem('access_token', data.access_token);
-        localStorage.setItem('refresh_token', data.refresh_token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        showAlert('alertMsg', isEn ? 'Login successful! Redirecting...' : 'लगइन सफल! पुन: निर्देशित हुँदै...', 'success');
-        setTimeout(() => { 
-          window.location.href = data.user.role === 'admin' ? '/admin-dashboard' : '/user-dashboard'; 
-        }, 1200);
-      } else if (res.status === 403 && data.requires_verification) {
-        showAlert('alertMsg', data.error || (isEn ? 'Please verify your email first.' : 'कृपया पहिले आफ्नो इमेल प्रमाणित गर्नुहोस्।'), 'warning');
-        setTimeout(() => window.location.href = '/verify-email?email=' + encodeURIComponent(email), 2000);
-      } else {
-        showAlert('alertMsg', data.error || (isEn ? 'Invalid email or password' : 'अमान्य इमेल वा पासवर्ड'), 'error');
-        btn.disabled = false; 
-        btnSpan.textContent = originalText;
+    // ----- CHECK FOR VALID SESSION (FIXED) -----
+    function checkValidSession() {
+      try {
+        const token = localStorage.getItem('access_token');
+        const userStr = localStorage.getItem('user');
+        
+        if (!token || !userStr) return false;
+        
+        const user = JSON.parse(userStr);
+        if (!user || !user.role) return false;
+        
+        // Check if token is valid (not expired)
+        try {
+          const parts = token.split('.');
+          if (parts.length === 3) {
+            const payload = JSON.parse(atob(parts[1]));
+            if (payload && payload.exp) {
+              const now = Math.floor(Date.now() / 1000);
+              if (payload.exp > now) {
+                // Token is valid - redirect to dashboard
+                const redirectUrl = user.role === 'admin' ? '/admin-dashboard' : '/user-dashboard';
+                window.location.href = redirectUrl;
+                return true;
+              }
+            }
+          }
+        } catch (e) {
+          // Token is invalid - clear it
+          console.warn('Invalid token detected, clearing...');
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          localStorage.removeItem('user');
+        }
+      } catch (e) {
+        // Invalid user data - clear it
+        console.warn('Invalid user data, clearing...');
+        localStorage.removeItem('user');
       }
-    } catch {
-      showAlert('alertMsg', isEn ? 'Network error. Please check your connection.' : 'नेटवर्क त्रुटि। कृपया आफ्नो कनेक्सन जाँच गर्नुहोस्।', 'error');
-      btn.disabled = false; 
-      btnSpan.textContent = originalText;
-    }
-  });
-
-  document.addEventListener('DOMContentLoaded', () => {
-    if (typeof window.LangManager !== 'undefined') {
-      setTimeout(() => {
-        updateLangButtonText();
-      }, 100);
-      window.addEventListener('languageChanged', updateLangButtonText);
-    } else {
-      console.error('shared.js not loaded! Check path: /statics/js/shared.js');
+      return false;
     }
 
-    // ===== FIX: Clear form fields if no active session =====
-    // This removes any stale autofill values after logout.
-    if (!localStorage.getItem('access_token')) {
-      document.getElementById('email').value = '';
-      document.getElementById('password').value = '';
-      const alert = document.getElementById('alertMsg');
-      if (alert) {
-        alert.className = 'alert';
-        alert.style.display = 'none';
-        alert.textContent = '';
+    // Run session check
+    const hasValidSession = checkValidSession();
+
+    // If no valid session, clear everything and show login form
+    if (!hasValidSession) {
+      // Clear any stale auth data
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user');
+      
+      // Clear form fields
+      const emailField = document.getElementById('email');
+      const passwordField = document.getElementById('password');
+      if (emailField) emailField.value = '';
+      if (passwordField) passwordField.value = '';
+      
+      // Clear any errors/alerts
+      const alertEl = document.getElementById('alertMsg');
+      if (alertEl) {
+        alertEl.className = 'alert';
+        alertEl.style.display = 'none';
+        alertEl.innerHTML = '';
       }
-      // Clear any error messages as well
       document.getElementById('emailErr').textContent = '';
       document.getElementById('pwErr').textContent = '';
     }
-  });
+
+    // ----- Password toggle - ONLY ONE EYE ICON -----
+    window.togglePw = function(event) {
+      if (event) event.preventDefault();
+      
+      const passwordField = document.getElementById('password');
+      const eyeIcon = document.getElementById('pwIcon');
+      
+      if (!passwordField || !eyeIcon) return;
+      
+      // Toggle password visibility
+      if (passwordField.type === 'password') {
+        passwordField.type = 'text';
+        eyeIcon.className = 'fas fa-eye-slash';
+      } else {
+        passwordField.type = 'password';
+        eyeIcon.className = 'fas fa-eye';
+      }
+      
+      // Focus back on the input
+      passwordField.focus();
+    };
+
+    // Also toggle on Enter key for accessibility
+    document.addEventListener('DOMContentLoaded', function() {
+      const toggleBtn = document.getElementById('togglePwBtn');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            togglePw(e);
+          }
+        });
+      }
+    });
+
+    // ----- Language toggle -----
+    document.getElementById('langToggle').addEventListener('click', function() {
+      if (typeof window.LangManager !== 'undefined') {
+        const newLang = window.LangManager.currentLang === 'en' ? 'np' : 'en';
+        window.LangManager.setLanguage(newLang);
+      }
+    });
+
+    function updateLangButtonText() {
+      const btnText = document.getElementById('langBtnText');
+      if (btnText && typeof window.LangManager !== 'undefined') {
+        btnText.innerText = window.LangManager.currentLang === 'en' ? 'नेपाली' : 'English';
+      }
+    }
+
+    // ----- Login form submission -----
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      // Check if already logged in with valid session
+      const token = localStorage.getItem('access_token');
+      const userStr = localStorage.getItem('user');
+      if (token && userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          if (user && user.role) {
+            window.location.href = user.role === 'admin' ? '/admin-dashboard' : '/user-dashboard';
+            return;
+          }
+        } catch (err) {}
+      }
+
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const isEn = window.LangManager && window.LangManager.currentLang === 'en';
+      
+      // Clear previous errors
+      document.getElementById('emailErr').textContent = '';
+      document.getElementById('pwErr').textContent = '';
+
+      // Validate
+      if (!email) { 
+        document.getElementById('emailErr').textContent = isEn ? 'Email is required' : 'इमेल आवश्यक छ'; 
+        return; 
+      }
+      if (!password) { 
+        document.getElementById('pwErr').textContent = isEn ? 'Password is required' : 'पासवर्ड आवश्यक छ'; 
+        return; 
+      }
+
+      // Disable button during login
+      const btn = document.getElementById('loginBtn');
+      const btnSpan = btn.querySelector('span');
+      const originalText = btnSpan.textContent;
+      btn.disabled = true; 
+      btnSpan.textContent = isEn ? 'Signing in...' : 'साइन इन हुँदैछ...';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          // Store auth data
+          localStorage.setItem('access_token', data.access_token);
+          localStorage.setItem('refresh_token', data.refresh_token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          
+          showAlert('alertMsg', 
+            isEn ? 'Login successful! Redirecting...' : 'लगइन सफल! पुन: निर्देशित हुँदै...', 
+            'success', 
+            1500
+          );
+          
+          // Redirect after short delay
+          setTimeout(function() { 
+            window.location.href = data.user.role === 'admin' ? '/admin-dashboard' : '/user-dashboard'; 
+          }, 1200);
+          
+        } else if (res.status === 403 && data.requires_verification) {
+          showAlert('alertMsg', 
+            data.error || (isEn ? 'Please verify your email first.' : 'कृपया पहिले आफ्नो इमेल प्रमाणित गर्नुहोस्।'), 
+            'warning', 
+            3000
+          );
+          setTimeout(function() { 
+            window.location.href = '/verify-email?email=' + encodeURIComponent(email); 
+          }, 2000);
+          
+        } else {
+          showAlert('alertMsg', 
+            data.error || (isEn ? 'Invalid email or password' : 'अमान्य इमेल वा पासवर्ड'), 
+            'error', 
+            3000
+          );
+          btn.disabled = false; 
+          btnSpan.textContent = originalText;
+        }
+        
+      } catch (error) {
+        console.error('Login error:', error);
+        showAlert('alertMsg', 
+          isEn ? 'Network error. Please check your connection.' : 'नेटवर्क त्रुटि। कृपया आफ्नो कनेक्सन जाँच गर्नुहोस्।', 
+          'error', 
+          3000
+        );
+        btn.disabled = false; 
+        btnSpan.textContent = originalText;
+      }
+    });
+
+    // ----- DOM ready -----
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize language manager
+      if (typeof window.LangManager !== 'undefined') {
+        setTimeout(updateLangButtonText, 100);
+        window.addEventListener('languageChanged', updateLangButtonText);
+      } else {
+        console.warn('shared.js not loaded! Check path: /statics/js/shared.js');
+      }
+    });
+
+  })();
 </script>
 </body>
 </html>

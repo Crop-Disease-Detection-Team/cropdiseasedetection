@@ -1,10 +1,11 @@
-from flask import Flask, jsonify, send_from_directory, render_template, redirect, url_for
+from flask import Flask, jsonify, send_from_directory, render_template, redirect, url_for, request
 from flask_cors import CORS
-from flask_jwt_extended import JWTManager
-from config import DevelopmentConfig, ProductionConfig, get_config, validate_config, print_config_summary
-from models import db, bcrypt, TokenBlacklist
+from flask_jwt_extended import JWTManager, get_jwt_identity, verify_jwt_in_request, get_jwt, create_access_token
+from config import DevelopmentConfig, ProductionConfig
+from models import db, bcrypt, TokenBlacklist, User
 import os
 import logging
+from datetime import timedelta
 
 logging.basicConfig(
     level=logging.INFO,
@@ -23,6 +24,10 @@ def create_app(config_name='development'):
         app.config.from_object(ProductionConfig)
     else:
         app.config.from_object(DevelopmentConfig)
+
+    # Set JWT expiration to 20 minutes
+    app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=20)
+    app.config['JWT_REFRESH_TOKEN_EXPIRES'] = timedelta(days=7)
 
     CORS(app,
          origins=app.config.get('CORS_ORIGINS', ['http://localhost:5500', 'http://127.0.0.1:5500', 'http://localhost:5000']),
@@ -99,22 +104,61 @@ def create_app(config_name='development'):
         return send_from_directory(os.path.join(base_dir, 'statics', 'images'), filename)
 
     # ============================================
-    # SERVE HTML PAGES
-    # FIX: / now redirects to /login so visiting localhost:5000
-    #      always lands on login when no token exists.
-    #      The frontend requireAuth() in auth.js handles the
-    #      redirect to dashboard if a valid token is present.
+    # SERVE HTML PAGES - SMART INDEX
     # ============================================
 
     @app.route('/')
     def index():
-        # Redirect root to login — the JS auth layer will
-        # redirect to dashboard if already logged in
-        return redirect(url_for('login_page'))
+        """Smart landing page - shows index if not logged in, dashboard if logged in"""
+        try:
+            # Check if user has valid token in Authorization header
+            auth_header = request.headers.get('Authorization')
+            if auth_header and auth_header.startswith('Bearer '):
+                token = auth_header.split(' ')[1]
+                try:
+                    # Try to verify the token
+                    verify_jwt_in_request()
+                    user_id = get_jwt_identity()
+                    user = User.query.get(int(user_id))
+                    if user and user.is_active and user.email_verified:
+                        # User is logged in - redirect to dashboard
+                        if user.role == 'admin':
+                            return redirect(url_for('admin_dashboard_page'))
+                        else:
+                            return redirect(url_for('user_dashboard_page'))
+                except Exception as e:
+                    # Token is invalid - show landing page
+                    pass
+            
+            # Also check for token in cookies (if you use cookies)
+            # If no valid token, show landing page
+            return render_template('index.html')
+            
+        except Exception as e:
+            logger.error(f"Error in index route: {str(e)}")
+            # On error, show landing page
+            return render_template('index.html')
 
     @app.route('/login')
     def login_page():
-        return render_template('login.html')
+        """Serve login page - redirects to dashboard if already logged in"""
+        try:
+            auth_header = request.headers.get('Authorization')
+            if auth_header and auth_header.startswith('Bearer '):
+                try:
+                    verify_jwt_in_request()
+                    user_id = get_jwt_identity()
+                    user = User.query.get(int(user_id))
+                    if user and user.is_active and user.email_verified:
+                        if user.role == 'admin':
+                            return redirect(url_for('admin_dashboard_page'))
+                        else:
+                            return redirect(url_for('user_dashboard_page'))
+                except:
+                    pass
+            return render_template('login.html')
+        except:
+            return render_template('login.html')
 
     @app.route('/register')
     def register_page():
@@ -167,17 +211,17 @@ def create_app(config_name='development'):
     @app.route('/static/samples/<filename>')
     def serve_samples(filename):
         return send_from_directory(os.path.join('static', 'samples'), filename)
+
     # ============================================
-# SERVE OUTPUTS (metrics, logs, curves)
-# ============================================
+    # SERVE OUTPUTS
+    # ============================================
 
     @app.route('/outputs/<path:filename>')
     def serve_outputs(filename):
-        """Serve files from the outputs directory (metrics, logs, plots)."""
         outputs_dir = os.path.join(base_dir, 'outputs')
-    # Create the folder if it doesn't exist (prevents errors)
         os.makedirs(outputs_dir, exist_ok=True)
         return send_from_directory(outputs_dir, filename)
+
     # ============================================
     # API HEALTH CHECK
     # ============================================
@@ -188,7 +232,8 @@ def create_app(config_name='development'):
             'status': 'healthy',
             'message': 'Crop Disease Detection API is running',
             'version': '1.0.0',
-            'token_blacklist': 'enabled'
+            'token_blacklist': 'enabled',
+            'session_timeout': '20 minutes'
         }), 200
 
     # ============================================
@@ -224,7 +269,7 @@ if __name__ == '__main__':
         if 'token_blacklist' in tables:
             logger.info(" Token blacklist table ready")
         else:
-            logger.info("  Token blacklist table not found - will be created")
+            logger.info(" Token blacklist table not found - will be created")
 
         from models import User
         admin_email = "bikram204sharma@gmail.com"
@@ -242,18 +287,19 @@ if __name__ == '__main__':
             db.session.commit()
             logger.info(" Admin user created")
         else:
-            logger.info(f" Admin user already exists: {admin_email}")
+            logger.info(f"Admin user already exists: {admin_email}")
 
     print("\n" + "="*60)
-    print("  CROP DISEASE DETECTION SYSTEM - BACKEND")
+    print("   CROP DISEASE DETECTION SYSTEM - BACKEND")
     print("="*60)
     print(f"  Server running at: http://localhost:5000")
+    print(f"  Session Timeout: 20 minutes")
     print(f"  Templates folder: {os.path.join(base_dir, 'templates')}")
     print(f"  Static folder:    {os.path.join(base_dir, 'static')}")
     print(f"  API Health:       http://localhost:5000/api/health")
     print(f"  Token Blacklist:  ENABLED")
-    print(f"\n  Available Pages:")
-    print(f"    Home:      http://localhost:5000/        → redirects to /login")
+    print(f"\n   Available Pages:")
+    print(f"    Home:      http://localhost:5000/        → Smart Index")
     print(f"    Login:     http://localhost:5000/login")
     print(f"    Register:  http://localhost:5000/register")
     print(f"    Verify:    http://localhost:5000/verify-email")
@@ -262,7 +308,7 @@ if __name__ == '__main__':
     print(f"    Admin DB:  http://localhost:5000/admin-dashboard")
     print(f"    Predict:   http://localhost:5000/predict")
     print(f"    History:   http://localhost:5000/history")
-    print(f"\n  Test Credentials:")
+    print(f"\n   Test Credentials:")
     print(f"    Admin: bikram204sharma@gmail.com / Admin@123")
     print(f"    User:  farmer@example.com / User@123")
     print("="*60 + "\n")

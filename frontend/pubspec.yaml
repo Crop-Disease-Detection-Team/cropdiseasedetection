@@ -1,0 +1,48 @@
+name: agrivision_ai
+description: AI-powered crop disease detection system
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_riverpod: ^2.6.1
+  flutter_hooks: ^0.20.5
+  hooks_riverpod: ^2.6.1
+  go_router: ^14.6.2
+  get_it: ^8.0.3
+  dio: ^5.7.0
+  flutter_secure_storage: ^9.2.2
+  camera: ^0.11.0+2
+  image_picker: ^1.1.2
+  permission_handler: ^11.3.1
+  google_fonts: ^6.2.1
+  fl_chart: ^0.69.2
+  shimmer: ^3.0.0
+  lottie: ^3.2.0
+  share_plus: ^10.1.2
+  pdf: ^3.11.1
+  printing: ^5.13.4
+  cached_network_image: ^3.4.1
+  intl: ^0.20.2
+  connectivity_plus: ^7.3.0
+  shared_preferences: ^2.5.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/images/auth/
+    - assets/icons/
+    - assets/lottie/

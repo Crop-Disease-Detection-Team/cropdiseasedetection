@@ -1,5 +1,5 @@
 name: crop_disease_app
-description: "Crop Disease Detection System - Flutter mobile client"
+description: "Crop Monitor - AI Crop Disease Detection - Flutter mobile client"
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -46,5 +46,21 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^4.0.0
 
+  # Generates the Android/iOS launcher icons from assets/icon/app_icon.png.
+  # Run: flutter pub run flutter_launcher_icons
+  flutter_launcher_icons: ^0.13.1
+
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icon/app_icon.png
+
+# Config used by the flutter_launcher_icons package above.
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/app_icon.png"
+  # Android 13+ adaptive icon (keeps the logo crisp instead of getting
+  # cropped into a circle/squircle by the launcher).
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"

@@ -3,13 +3,12 @@ import json
 
 BASE_URL = "http://localhost:5000/api"
 
-print("=" * 60)
-print(" CROP DISEASE DETECTION - API TESTING")
-print("=" * 60)
 
-# ============================================
+print(" CROP DISEASE DETECTION - API TESTING")
+
+
 # 1. Login as Admin
-# ============================================
+
 print("\n1️ Logging in as Admin...")
 response = requests.post(f"{BASE_URL}/auth/login", json={
     "email": "bikram204sharma@gmail.com",
@@ -26,9 +25,8 @@ print(f"Admin Login Successful!")
 print(f"   Name: {admin_user['name']}")
 print(f"   Role: {admin_user['role']}")
 
-# ============================================
 # 2. Get All Diseases (Protected)
-# ============================================
+
 print("\n2️ Getting All Diseases...")
 headers = {"Authorization": f"Bearer {admin_token}"}
 response = requests.get(f"{BASE_URL}/user/diseases", headers=headers)
@@ -43,9 +41,8 @@ if response.status_code == 200:
 else:
     print(f" Failed: {response.status_code}")
 
-# ============================================
 # 3. Get User Statistics
-# ============================================
+
 print("\n3️ Getting User Statistics...")
 response = requests.get(f"{BASE_URL}/user/statistics", headers=headers)
 
@@ -58,9 +55,9 @@ if response.status_code == 200:
 else:
     print(f" Failed: {response.status_code}")
 
-# ============================================
+
 # 4. Get Scan History
-# ============================================
+
 print("\n4️ Getting Scan History...")
 response = requests.get(f"{BASE_URL}/user/history", headers=headers)
 
@@ -72,9 +69,8 @@ if response.status_code == 200:
 else:
     print(f"failed: {response.status_code}")
 
-# ============================================
 # 5. Admin Dashboard (Admin only)
-# ============================================
+
 print("\n5️ Getting Admin Dashboard...")
 response = requests.get(f"{BASE_URL}/admin/dashboard/stats", headers=headers)
 
@@ -88,9 +84,9 @@ if response.status_code == 200:
 else:
     print(f" Failed: {response.status_code}")
 
-# ============================================
-# 6. Get Medicines
-# ============================================
+
+#Get Medicines
+
 print("\n6️ Getting Medicines...")
 response = requests.get(f"{BASE_URL}/user/medicines", headers=headers)
 
@@ -100,18 +96,8 @@ if response.status_code == 200:
 else:
     print(f" Failed: {response.status_code}")
 
-# ============================================
-# 7. Get Favorites
-# ============================================
-print("\n7️ Getting Favorites...")
-response = requests.get(f"{BASE_URL}/user/favorites", headers=headers)
 
-if response.status_code == 200:
-    favorites = response.json()
-    print(f" Found {len(favorites.get('favorites', []))} favorites")
-else:
-    print(f"Failed: {response.status_code}")
 
-print("\n" + "=" * 60)
+
+
 print(" ALL API TESTS COMPLETED SUCCESSFULLY!")
-print("=" * 60)

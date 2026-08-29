@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db, User, ScanHistory, Disease, UserFavorite
-from datetime import datetime
+from datetime import datetime  
 import os
-import uuid
+import uuid  
 import logging
 
 from ml_model import get_predictor
@@ -14,9 +14,7 @@ logger = logging.getLogger(__name__)
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# ============================================
-# GET ALL DISEASES
-# ============================================
+#diseases (getting all )
 
 @user_bp.route('/diseases', methods=['GET'])
 @jwt_required()
@@ -31,9 +29,7 @@ def get_diseases():
         logger.error(f"Get diseases error: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
-# ============================================
-# GET DISEASE DETAILS
-# ============================================
+#getting the diseases database deitals from the table"diseases"
 
 @user_bp.route('/diseases/<int:disease_id>', methods=['GET'])
 @jwt_required()
@@ -47,9 +43,7 @@ def get_disease_detail(disease_id):
         logger.error(f"Get disease detail error: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
-# ============================================
-# PREDICT DISEASE
-# ============================================
+#predicting disease
 
 @user_bp.route('/predict', methods=['POST'])
 @jwt_required()
@@ -111,10 +105,7 @@ def predict():
         traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
-# ============================================
-# GET SCAN HISTORY
-# ============================================
-
+#getting the scan history 
 @user_bp.route('/history', methods=['GET'])
 @jwt_required()
 def get_history():
@@ -138,9 +129,8 @@ def get_history():
         logger.error(f"Get history error: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
-# ============================================
-# GET USER STATISTICS
-# ============================================
+#getting the user statics 
+
 
 @user_bp.route('/statistics', methods=['GET'])
 @jwt_required()
@@ -165,9 +155,9 @@ def get_statistics():
         logger.error(f"Get statistics error: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
-# ============================================
-# FAVORITES
-# ============================================
+
+#FAVORITES
+#this is the optional code for future updates ............#can ignore this section for now #cmt by bikky 
 
 @user_bp.route('/favorites', methods=['GET'])
 @jwt_required()
@@ -261,7 +251,7 @@ def get_user_scans():
             'scans': [{
                 'id': s.id,
                 'disease_name': s.disease_name,
-                'confidence': s.confidence,
+                'confidence': float(s.confidence) if s.confidence is not None else 0,
                 'severity': s.severity if hasattr(s, 'severity') else 'medium',
                 'scanned_at': s.scanned_at.isoformat() if s.scanned_at else None,
                 'image_path': s.image_path

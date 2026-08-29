@@ -122,11 +122,11 @@ def send_email(to_email, otp, name="", purpose="reset"):
             if EMAIL_PASSWORD:
                 server.login(EMAIL_USER, EMAIL_PASSWORD)
             server.send_message(msg)
-        print(f"✅ Email sent to {to_email}")
+        print(f" Email sent to {to_email}")
         return True, "Email sent"
     except Exception as e:
-        print(f"❌ Email error: {e}")
-        print(f"\n📧 OTP for {to_email}: {otp}\n")
+        print(f" Email error: {e}")
+        print(f"\n OTP for {to_email}: {otp}\n")
         return True, "OTP generated (check terminal)"
 
 def generate_otp():

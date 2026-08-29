@@ -362,7 +362,7 @@
       background: #f0ece4;
       padding: 3px 10px;
       border-radius: 30px;
-      color: #6a5a49;
+      color: #6a5a49; 
     }
     .req-pill.met {
       background: #ddecdb;
@@ -443,7 +443,7 @@
 </head>
 <body>
 
-<!-- Language Toggle -->
+<!-- Language Toggle no api call clinet side only -->
 <div class="lang-switch" id="langToggle">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
     <path d="M5 8l6 6"/><path d="M4 14l6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/>
@@ -537,31 +537,70 @@
       <button class="btn btn-primary btn-full" id="verifyBtn" data-lang-key="verify_btn">इमेल प्रमाणित गर्नुहोस्</button>
       <button class="btn btn-secondary btn-full" id="resendBtn" style="margin-top:8px;" data-lang-key="resend_btn">कोड पुन: पठाउनुहोस्</button>
     </div>
-    <div class="login-link"><span data-lang-key="already_have_account">पहिले देखि खाता छ?</span> <a href="/login" data-lang-key="login_link">साइन इन →</a></div>
+    <div class="login-link"><span data-lang-key="already_have_account">पहिले देखि खाता छ?</span> <a href="/login"  data-lang-key="login_link">साइन इन →</a></div>
   </div>
 </main>
 
 <script src="/statics/js/shared.js"></script>
 
 <script>
-  // Page-specific password helpers
+
+  //REGISTER PAGe
+
+
+  // ----- Helper: Show Alert (safe) -----
+  function showAlertMessage(msg, type) {
+    console.log(` Alert [${type}]: ${msg}`);
+    const el = document.getElementById('alertMsg');
+    if (!el) {
+      console.warn('Alert element not found, using browser alert as fallback.');
+      alert(`${type.toUpperCase()}: ${msg}`);
+      return;
+    }
+    el.className = `alert ${type}`;
+    el.innerText = msg;
+    el.style.display = 'block';
+    // Auto-hide after 5 seconds
+    clearTimeout(window._alertTimer);
+    window._alertTimer = setTimeout(() => {
+      if (el) el.style.display = 'none';
+    }, 5000);
+  }
+
+  // ----- Password helpers -----
   function togglePw(fId, iId) {
-    const f = document.getElementById(fId), i = document.getElementById(iId);
-    if (f.type === 'password') { f.type = 'text'; i.className = 'fas fa-eye-slash'; }
-    else { f.type = 'password'; i.className = 'fas fa-eye'; }
+    const f = document.getElementById(fId);
+    const i = document.getElementById(iId);
+    if (!f || !i) return;
+    if (f.type === 'password') {
+      f.type = 'text';
+      i.className = 'fas fa-eye-slash';
+    } else {
+      f.type = 'password';
+      i.className = 'fas fa-eye';
+    }
   }
 
   function pwChecks(pw) {
-    return { len: pw.length >= 8, up: /[A-Z]/.test(pw), lo: /[a-z]/.test(pw), num: /[0-9]/.test(pw), sp: /[!@#$%^&*()\-_=+[\]{};:'",.<>/?\\|`~]/.test(pw) };
+    return {
+      len: pw.length >= 8,
+      up: /[A-Z]/.test(pw),
+      lo: /[a-z]/.test(pw),
+      num: /[0-9]/.test(pw),
+      sp: /[!@#$%^&*()\-_=+[\]{};:'",.<>/?\\|`~]/.test(pw)
+    };
   }
-  
+
   function updateStrength() {
-    const pw = document.getElementById('password').value;
-    const c = pwChecks(pw);
+    const pw = document.getElementById('password');
+    if (!pw) return;
+    const val = pw.value;
+    const c = pwChecks(val);
     const sc = Object.values(c).filter(Boolean).length;
     const bars = ['sb1','sb2','sb3','sb4'];
     bars.forEach((id, i) => {
       const el = document.getElementById(id);
+      if (!el) return;
       if (i < sc) {
         if (sc <= 2) el.className = 's-bar weak';
         else if (sc === 3) el.className = 's-bar fair';
@@ -569,124 +608,282 @@
         else if (sc === 5) el.className = 's-bar strong';
       } else el.className = 's-bar';
     });
-    [['r1',c.len],['r2',c.up],['r3',c.lo],['r4',c.num],['r5',c.sp]].forEach(([id,v]) => document.getElementById(id).classList.toggle('met', v));
+    // Update requirement pills
+    const reqMap = { r1: c.len, r2: c.up, r3: c.lo, r4: c.num, r5: c.sp };
+    Object.keys(reqMap).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('met', reqMap[id]);
+    });
     return sc === 5;
   }
-  
+
   function enforceEnglishPassword() {
     const pwField = document.getElementById('password');
+    if (!pwField) return;
     let val = pwField.value;
     const allowedRegex = /^[A-Za-z0-9!@#$%^&*()_\-+=\[\]{};:'",.<>/?\\|`~ ]*$/;
     if (!allowedRegex.test(val)) {
       const newVal = val.replace(/[^\x00-\x7F]/g, '');
       pwField.value = newVal;
-      if(newVal !== val) {
+      if (newVal !== val) {
         const isEn = window.LangManager && window.LangManager.currentLang === 'en';
         showAlertMessage(isEn ? 'Password uses only English letters, numbers & symbols' : 'पासवर्डमा अंग्रेजी अक्षर/संख्या/चिन्ह मात्र', 'error');
       }
     }
     updateStrength();
   }
-  
+
   function checkConfirm() {
-    const p = document.getElementById('password').value, c = document.getElementById('cfPw').value;
+    const p = document.getElementById('password');
+    const c = document.getElementById('cfPw');
+    if (!p || !c) return;
     const isEn = window.LangManager && window.LangManager.currentLang === 'en';
-    document.getElementById('cfErr').innerText = (c && p !== c) ? (isEn ? 'Passwords do not match' : 'पासवर्ड मेल खादैनन्') : '';
+    const err = document.getElementById('cfErr');
+    if (!err) return;
+    if (c.value && p.value !== c.value) {
+      err.innerText = isEn ? 'Passwords do not match' : 'पासवर्ड मेल खादैनन्';
+    } else {
+      err.innerText = '';
+    }
   }
 
-  function showAlertMessage(msg, type) {
-    const c = document.getElementById('alertMsg');
-    c.className = `alert ${type}`;
-    c.innerText = msg;
-    c.style.display = 'block';
-    setTimeout(() => { if(c) c.style.display = 'none'; }, 3500);
-  }
-
+  // ----- OTP handling -----
   const digits = Array.from(document.querySelectorAll('.otp-box'));
   digits.forEach((d, i) => {
-    d.addEventListener('input', e => { let v = e.target.value.replace(/\D/g,''); e.target.value = v; if (v && i < digits.length-1) digits[i+1].focus(); });
-    d.addEventListener('keydown', e => { if (e.key === 'Backspace' && !d.value && i>0) digits[i-1].focus(); });
-    d.addEventListener('paste', e => { e.preventDefault(); let paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,''); paste.split('').forEach((ch, idx) => { if (digits[i+idx]) digits[i+idx].value = ch; }); });
+    if (!d) return;
+    d.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g,'');
+      e.target.value = v;
+      if (v && i < digits.length - 1) digits[i+1].focus();
+    });
+    d.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !d.value && i > 0) digits[i-1].focus();
+    });
+    d.addEventListener('paste', e => {
+      e.preventDefault();
+      const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'');
+      paste.split('').forEach((ch, idx) => {
+        if (digits[i+idx]) digits[i+idx].value = ch;
+      });
+    });
   });
 
-  let curEmail = '', timerInt = null, timeLeft = 300;
-  
+  let curEmail = '';
+  let timerInt = null;
+  let timeLeft = 300;
+
   function startTimer() {
-    clearInterval(timerInt); timeLeft = 300;
+    clearInterval(timerInt);
+    timeLeft = 300;
     const el = document.getElementById('timerTxt');
     const verifyBtn = document.getElementById('verifyBtn');
-    if(verifyBtn) verifyBtn.disabled = false;
+    if (verifyBtn) verifyBtn.disabled = false;
     const tick = () => {
-      const m = Math.floor(timeLeft/60), s = timeLeft%60;
+      const m = Math.floor(timeLeft / 60);
+      const s = timeLeft % 60;
       const isEn = window.LangManager && window.LangManager.currentLang === 'en';
-      el.innerText = isEn ? `Code expires in ${m}:${String(s).padStart(2,'0')}` : `कोडको म्याद ${m}:${String(s).padStart(2,'0')} मा सकिन्छ`;
-      if (timeLeft-- <= 0) { clearInterval(timerInt); el.innerText = isEn ? 'Code expired — resend.' : 'कोड सकियो — पुन: पठाउनुहोस्'; if(verifyBtn) verifyBtn.disabled = true; }
+      if (el) {
+        el.innerText = isEn ? `Code expires in ${m}:${String(s).padStart(2,'0')}` : `कोडको म्याद ${m}:${String(s).padStart(2,'0')} मा सकिन्छ`;
+      }
+      if (timeLeft-- <= 0) {
+        clearInterval(timerInt);
+        if (el) el.innerText = isEn ? 'Code expired — resend.' : 'कोड सकियो — पुन: पठाउनुहोस्';
+        if (verifyBtn) verifyBtn.disabled = true;
+      }
     };
-    tick(); timerInt = setInterval(tick,1000);
+    tick();
+    timerInt = setInterval(tick, 1000);
   }
 
+  // ----- Safe OTP panel display -----
   function showOtp(email) {
-    curEmail = email;
-    document.getElementById('otpEmailDisplay').innerText = email;
-    document.getElementById('formPanel').style.display = 'none';
-    document.getElementById('otpPanel').classList.add('show');
-    document.getElementById('st1').classList.remove('active'); document.getElementById('st1').classList.add('done');
-    document.getElementById('st2').classList.add('active');
-    if(digits[0]) digits[0].focus();
-    startTimer();
+    try {
+      console.log('🔹 showOtp called with email:', email);
+      curEmail = email;
+
+      // Update email display
+      const emailDisplay = document.getElementById('otpEmailDisplay');
+      if (emailDisplay) emailDisplay.innerText = email;
+
+      // Hide form, show OTP panel
+      const formPanel = document.getElementById('formPanel');
+      const otpPanel = document.getElementById('otpPanel');
+      if (formPanel) formPanel.style.display = 'none';
+      if (otpPanel) otpPanel.classList.add('show');
+
+      // Update steps
+      const st1 = document.getElementById('st1');
+      const st2 = document.getElementById('st2');
+      if (st1) { st1.classList.remove('active'); st1.classList.add('done'); }
+      if (st2) st2.classList.add('active');
+
+      // Focus first OTP box
+      if (digits.length > 0 && digits[0]) digits[0].focus();
+
+      // Start timer
+      startTimer();
+    } catch (err) {
+      console.error(' Error in showOtp:', err);
+      // Fallback: show OTP in alert and redirect to login (since we can't display panel)
+      const isEn = window.LangManager && window.LangManager.currentLang === 'en';
+      showAlertMessage(
+        isEn ? 'Verification code sent. Please check your email and login.' : 'प्रमाणिकरण कोड पठाइयो। कृपया आफ्नो इमेल जाँच गर्नुहोस् र लगइन गर्नुहोस्।',
+        'success'
+      );
+      // Redirect to login after 3 seconds
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 3000);
+    }
   }
 
-  // Form submission
+  // ----- Form submission -----
   document.getElementById('regForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const name = document.getElementById('name').value.trim(), email = document.getElementById('email').value.trim().toLowerCase();
-    const phone = document.getElementById('phone').value.trim(), address = document.getElementById('address').value.trim();
-    const password = document.getElementById('password').value, cfPw = document.getElementById('cfPw').value;
-    const isEn = window.LangManager && window.LangManager.currentLang === 'en';
-    
-    ['nameErr','emailErr','pwErr','cfErr'].forEach(id => document.getElementById(id).innerText = '');
-    
-    if (name.length < 2) { document.getElementById('nameErr').innerText = isEn ? 'Full name required (min 2 chars)' : 'पुरा नाम चाहिन्छ (कम्तीमा २ अक्षर)'; return; }
-    if (!/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/.test(email)) { document.getElementById('emailErr').innerText = isEn ? 'Valid email required' : 'मान्य इमेल आवश्यक छ'; return; }
-    if (!updateStrength()) { document.getElementById('pwErr').innerText = isEn ? 'Password does not meet requirements' : 'पासवर्ड आवश्यकताहरू पूरा गर्दैन'; return; }
-    if (password !== cfPw) { document.getElementById('cfErr').innerText = isEn ? 'Passwords do not match' : 'पासवर्ड मेल खादैनन्'; return; }
+    console.log('🔹 Form submitted');
 
-    const btn = document.getElementById('submitBtn'), submitSpan = btn.querySelector('span');
-    btn.disabled = true; submitSpan.innerText = isEn ? 'Creating account…' : 'खाता बनाउँदै...';
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim().toLowerCase();
+    const phone = document.getElementById('phone').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const password = document.getElementById('password').value;
+    const cfPw = document.getElementById('cfPw').value;
+    const isEn = window.LangManager && window.LangManager.currentLang === 'en';
+
+    // Clear previous errors
+    ['nameErr','emailErr','pwErr','cfErr'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.innerText = '';
+    });
+
+    // Validation
+    if (name.length < 2) {
+      const err = document.getElementById('nameErr');
+      if (err) err.innerText = isEn ? 'Full name required (min 2 chars)' : 'पुरा नाम चाहिन्छ (कम्तीमा २ अक्षर)';
+      return;
+    }
+    if (!/^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/.test(email)) {
+      const err = document.getElementById('emailErr');
+      if (err) err.innerText = isEn ? 'Valid email required' : 'मान्य इमेल आवश्यक छ';
+      return;
+    }
+    if (!updateStrength()) {
+      const err = document.getElementById('pwErr');
+      if (err) err.innerText = isEn ? 'Password does not meet requirements' : 'पासवर्ड आवश्यकताहरू पूरा गर्दैन';
+      return;
+    }
+    if (password !== cfPw) {
+      const err = document.getElementById('cfErr');
+      if (err) err.innerText = isEn ? 'Passwords do not match' : 'पासवर्ड मेल खादैनन्';
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    const submitSpan = btn ? btn.querySelector('span') : null;
+    btn.disabled = true;
+    if (submitSpan) submitSpan.innerText = isEn ? 'Creating account…' : 'खाता बनाउँदै...';
+
     try {
-      const res = await fetch('/api/auth/register', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,email,phone,address,password}) });
-      const d = await res.json();
-      if (res.ok) { showOtp(email); showAlertMessage(d.message || (isEn ? 'Verification code sent' : 'प्रमाणिकरण कोड पठाइयो'), 'success'); }
-      else { showAlertMessage(d.error || (isEn ? 'Registration failed' : 'दर्ता असफल'), 'error'); btn.disabled = false; submitSpan.innerText = isEn ? 'Create account' : 'खाता बनाउनुहोस्'; }
-    } catch(err) { showAlertMessage(isEn ? 'Server unreachable' : 'सर्भर पहुँच बाहिर', 'error'); btn.disabled = false; submitSpan.innerText = isEn ? 'Create account' : 'खाता बनाउनुहोस्'; }
+      console.log('🔹 Sending POST to /api/auth/register');
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, phone, address, password })
+      });
+
+      // Read response as text first (in case it's not JSON)
+      const rawText = await res.text();
+      console.log('🔹 Raw response:', rawText);
+
+      let data;
+      try {
+        data = JSON.parse(rawText);
+      } catch (parseErr) {
+        console.error(' Failed to parse JSON:', parseErr);
+        throw new Error('Server returned invalid JSON');
+      }
+
+      if (res.ok) {
+        // Success – show OTP panel
+        console.log(' Registration successful, showing OTP panel');
+        showOtp(email);
+        showAlertMessage(data.message || (isEn ? 'Verification code sent' : 'प्रमाणिकरण कोड पठाइयो'), 'success');
+      } else {
+        // API error
+        console.warn(' Server returned error:', data);
+        showAlertMessage(data.error || (isEn ? 'Registration failed' : 'दर्ता असफल'), 'error');
+      }
+    } catch (err) {
+      console.error(' Fetch or processing error:', err);
+      // Show "Server unreachable" but more informative
+      const msg = isEn ? 'Server unreachable. Please check your connection.' : 'सर्भर पहुँच बाहिर। कृपया आफ्नो जडान जाँच गर्नुहोस्।';
+      showAlertMessage(msg, 'error');
+    } finally {
+      btn.disabled = false;
+      if (submitSpan) submitSpan.innerText = isEn ? 'Create account' : 'खाता बनाउनुहोस्';
+    }
   });
 
+  // ----- OTP verification -----
   document.getElementById('verifyBtn').onclick = async () => {
     const code = digits.map(d => d.value).join('');
     const isEn = window.LangManager && window.LangManager.currentLang === 'en';
-    if (code.length !== 6) { document.getElementById('otpErr').innerText = isEn ? 'Enter all 6 digits' : 'सबै ६ अंक राख्नुहोस्'; return; }
+    if (code.length !== 6) {
+      document.getElementById('otpErr').innerText = isEn ? 'Enter all 6 digits' : 'सबै ६ अंक राख्नुहोस्';
+      return;
+    }
     document.getElementById('otpErr').innerText = '';
     try {
-      const res = await fetch('/api/auth/verify-email', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:curEmail, otp:code}) });
+      const res = await fetch('/api/auth/verify-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: curEmail, otp: code })
+      });
       const d = await res.json();
-      if (res.ok) { showAlertMessage(d.message, 'success'); clearInterval(timerInt); setTimeout(() => window.location.href='/login',1800); }
-      else showAlertMessage(d.error || (isEn ? 'Verification failed' : 'प्रमाणिकरण असफल'), 'error');
-    } catch { showAlertMessage(isEn ? 'Network error' : 'नेटवर्क त्रुटि', 'error'); }
+      if (res.ok) {
+        showAlertMessage(d.message, 'success');
+        clearInterval(timerInt);
+        setTimeout(() => window.location.href = '/login', 1800);
+      } else {
+        showAlertMessage(d.error || (isEn ? 'Verification failed' : 'प्रमाणिकरण असफल'), 'error');
+      }
+    } catch (err) {
+      console.error('Verification error:', err);
+      showAlertMessage(isEn ? 'Network error' : 'नेटवर्क त्रुटि', 'error');
+    }
   };
 
+  // ----- Resend OTP -----
   document.getElementById('resendBtn').onclick = async () => {
     const isEn = window.LangManager && window.LangManager.currentLang === 'en';
     try {
-      const res = await fetch('/api/auth/resend-verification', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email:curEmail}) });
+      const res = await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: curEmail })
+      });
       const d = await res.json();
-      if (res.ok) { showAlertMessage(d.message, 'success'); digits.forEach(d=>d.value=''); digits[0].focus(); startTimer(); }
-      else showAlertMessage(d.error || (isEn ? 'Resend failed' : 'पुन: पठाउन असफल'), 'error');
-    } catch { showAlertMessage(isEn ? 'Network error' : 'नेटवर्क त्रुटि', 'error'); }
+      if (res.ok) {
+        showAlertMessage(d.message, 'success');
+        digits.forEach(d => d.value = '');
+        if (digits[0]) digits[0].focus();
+        startTimer();
+      } else {
+        showAlertMessage(d.error || (isEn ? 'Resend failed' : 'पुन: पठाउन असफल'), 'error');
+      }
+    } catch (err) {
+      console.error('Resend error:', err);
+      showAlertMessage(isEn ? 'Network error' : 'नेटवर्क त्रुटि', 'error');
+    }
   };
 
-  document.getElementById('password').addEventListener('input', enforceEnglishPassword);
+  // ----- Password field events -----
+  const pwField = document.getElementById('password');
+  if (pwField) {
+    pwField.addEventListener('input', enforceEnglishPassword);
+  }
 
-  // Language toggle
+  // ----- Language toggle -----
   document.getElementById('langToggle').addEventListener('click', () => {
     if (typeof window.LangManager !== 'undefined') {
       const newLang = window.LangManager.currentLang === 'en' ? 'np' : 'en';
@@ -694,7 +891,6 @@
     }
   });
 
-  // Update language button text
   function updateLangButtonText() {
     const btnText = document.getElementById('langBtnText');
     if (btnText && typeof window.LangManager !== 'undefined') {
@@ -702,20 +898,16 @@
     }
   }
 
-  // Initialize page
+  // ----- Initialization -----
   document.addEventListener('DOMContentLoaded', () => {
     if (typeof window.LangManager !== 'undefined') {
       setTimeout(() => {
         updateLangButtonText();
-        const otpEmailDisplay = document.getElementById('otpEmailDisplay');
-        if (otpEmailDisplay && curEmail) {
-          otpEmailDisplay.innerText = curEmail;
+        const emailDisplay = document.getElementById('otpEmailDisplay');
+        if (emailDisplay && curEmail) {
+          emailDisplay.innerText = curEmail;
         }
       }, 150);
-      // shared.js dispatches 'langApplied' (not 'languageChanged') — that
-      // event name doesn't exist anywhere in shared.js, so this listener
-      // was previously dead code and the button text never updated after
-      // the first load. Same bug found and fixed in user-dashboard.html.
       window.addEventListener('langApplied', updateLangButtonText);
     } else {
       console.error('shared.js not loaded! Check path: /statics/js/shared.js');

@@ -7,9 +7,8 @@ from datetime import datetime, timedelta
 
 admin_bp = Blueprint('admin', __name__)
 
-# ============================================
-# ADMIN CHECK FUNCTION
-# ============================================
+#ADMIN CHECK FUNCTION
+
 
 def is_admin():
     """Check if current user is admin"""
@@ -30,9 +29,9 @@ def admin_required(f):
     return decorated
 
 
-# ============================================
-# ADMIN DASHBOARD STATISTICS
-# ============================================
+
+#ADMIN DASHBOARD STATISTICS
+
 
 @admin_bp.route('/dashboard/stats', methods=['GET'])
 @jwt_required()
@@ -84,9 +83,8 @@ def get_stats():
         return jsonify({'error': str(e)}), 500
 
 
-# ============================================
 # GET ALL USERS (with search and pagination)
-# ============================================
+
 
 @admin_bp.route('/users', methods=['GET'])
 @jwt_required()
@@ -205,7 +203,7 @@ def get_user_details(user_id):
                 'id': s.id,
                 'disease_name': (s.disease_name or 'Unknown').replace('___', ' - ').replace('_', ' '),
                 # FIX: safe confidence formatting whether stored as 0-1 or 0-100
-                'confidence': round(s.confidence * 100, 2) if s.confidence and s.confidence <= 1 else round(s.confidence or 0, 2),
+                'confidence': float(round(s.confidence * 100, 2)) if s.confidence and s.confidence <= 1 else float(round(s.confidence or 0, 2)),
                 'severity': s.severity if hasattr(s, 'severity') else 'medium',
                 'scanned_at': s.scanned_at.isoformat() if s.scanned_at else None
             } for s in recent_scans]
@@ -278,7 +276,7 @@ def get_all_scans():
                 'user_email': user.email if user else 'Unknown',
                 'disease_name': (scan.disease_name or 'Unknown').replace('___', ' - ').replace('_', ' '),
                 # FIX: safe confidence formatting
-                'confidence': round(scan.confidence * 100, 2) if scan.confidence and scan.confidence <= 1 else round(scan.confidence or 0, 2),
+                'confidence': float(round(scan.confidence * 100, 2)) if scan.confidence and scan.confidence <= 1 else float(round(scan.confidence or 0, 2)),
                 'severity': scan.severity if hasattr(scan, 'severity') else 'medium',
                 'scanned_at': scan.scanned_at.isoformat() if scan.scanned_at else None,
                 'image_url': scan.image_path if hasattr(scan, 'image_path') else None

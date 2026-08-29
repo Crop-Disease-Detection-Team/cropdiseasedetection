@@ -38,12 +38,12 @@ class PlantDiseaseClassifier(nn.Module):
         x = torch.flatten(x, 1)
         return self.classifier(x)
 
-# ---- Paths ----
+#---- Paths ----
 BASE_DIR = Path(__file__).parent
 MODEL_PATH = BASE_DIR / "models" / "best_model.pth"
 CLASS_NAMES_PATH = BASE_DIR / "models" / "class_names.json"
 
-# Check if model exists (if not, still run with warning)
+#Check if model exists (if not, still run with warning)
 model_available = True
 if not MODEL_PATH.exists():
     print(f"WARNING: Model not found at {MODEL_PATH}")
@@ -156,9 +156,8 @@ def get_disease_details(disease_code):
     return None, None
 
 
-# ------------------------------
-# Prediction endpoint
-# ------------------------------
+#Prediction endpoint
+
 @predict_bp.route('/predict', methods=['POST'])
 @jwt_required()
 def predict_disease():
@@ -284,9 +283,9 @@ Prevention Tips: {result.get('prevention_tips', 'Regular monitoring and crop rot
         return jsonify({'error': str(e)}), 500
 
 
-# ------------------------------
-# Batch prediction endpoint
-# ------------------------------
+
+#Batch prediction endpoint
+
 @predict_bp.route('/predict/batch', methods=['POST'])
 @jwt_required()
 def predict_batch():
@@ -337,9 +336,8 @@ def predict_batch():
         return jsonify({'error': str(e)}), 500
 
 
-# ------------------------------
-# Model info endpoint
-# ------------------------------
+#Model info endpoint
+
 @predict_bp.route('/model/info', methods=['GET'])
 def model_info():
     try:
@@ -354,9 +352,9 @@ def model_info():
         return jsonify({'error': str(e), 'model_loaded': False}), 200
 
 
-# ------------------------------
-# Scan history endpoint
-# ------------------------------
+
+#Scan history endpoint
+
 @predict_bp.route('/history', methods=['GET'])
 @jwt_required()
 def get_scan_history():
@@ -385,7 +383,7 @@ def get_scan_history():
             scan_dict = {
                 'id': scan.id,
                 'disease_name': scan.disease_name.replace('___', ' - ').replace('_', ' ') if scan.disease_name else 'Unknown',
-                'confidence': round(scan.confidence * 100, 2) if scan.confidence and scan.confidence < 1 else round(scan.confidence or 0, 2),
+                'confidence': float(round(scan.confidence * 100, 2)) if scan.confidence and scan.confidence < 1 else float(round(scan.confidence or 0, 2)),
                 'severity': scan.severity,
                 'scanned_at': scan.scanned_at.isoformat() if scan.scanned_at else None,
                 'image_url': scan.image_path,

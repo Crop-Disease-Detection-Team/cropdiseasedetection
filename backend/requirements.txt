@@ -1,7 +1,6 @@
-# ============================================================
-# Crop Disease Detection System — Python Dependencies
-# Install with: pip install -r requirements.txt
-# ============================================================
+
+#Crop Disease Detection System — Python Dependencies
+#Install with: pip install -r requirements.txt
 
 # --- Flask core ---
 Flask==3.1.1
@@ -25,7 +24,7 @@ numpy==2.2.4
 # --- HTTP / utilities ---
 python-dotenv==1.0.1
 Werkzeug==3.1.3
-gunicorn==23.0.0             # Production WSGI server
+gunicorn==23.0.0             #Production WSGI server
 
 # --- Dev / testing (optional) ---
 pytest==8.3.5

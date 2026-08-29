@@ -1,0 +1,50 @@
+name: crop_disease_app
+description: "Crop Disease Detection System - Flutter mobile client"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+
+  # Networking
+  http: ^1.2.1
+
+  # Local storage (JWT tokens, cached user)
+  shared_preferences: ^2.2.3
+
+  # State management
+  provider: ^6.1.2
+
+  # Fonts (matches web app: 'Inter')
+  google_fonts: ^6.2.1
+
+  # Camera / gallery image picking for prediction
+  image_picker: ^1.1.2
+
+  # Cached network images (disease reference images, profile pics)
+  cached_network_image: ^3.3.1
+
+  # Pull to refresh & nice loading shimmer (optional but used)
+  shimmer: ^3.0.0
+
+  # Charts for admin/user stats (mirrors dashboard graphs on web)
+  fl_chart: ^0.68.0
+
+  # Permission handling for camera/storage
+  permission_handler: ^11.3.1
+
+  # Date formatting
+  intl: ^0.19.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true

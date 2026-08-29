@@ -1,0 +1,52 @@
+ANDROID PERMISSIONS & CONFIG — copy into your project after `flutter create .`
+================================================================================
+
+FILE: android/app/src/main/AndroidManifest.xml
+------------------------------------------------
+Add these permission lines ABOVE the <application> tag:
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+Then, on the <application ...> tag itself, add:
+
+    android:usesCleartextTraffic="true"
+
+This last one is REQUIRED because your Flask backend runs on plain http://
+(not https://). Android 9+ blocks cleartext (non-HTTPS) network calls by
+default, so without this flag every API call will fail silently with a
+SocketException. Once you deploy the backend behind HTTPS in production,
+you can remove this flag.
+
+Full <application> tag should look like:
+
+    <application
+        android:label="crop_disease_app"
+        android:name="${applicationName}"
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="true">
+        ...
+    </application>
+
+
+FILE: android/app/build.gradle (or android/app/build.gradle.kts)
+------------------------------------------------------------------
+Make sure minSdkVersion is at least 21 (23+ recommended for image_picker):
+
+    minSdkVersion 23   // (Groovy)  or  minSdk = 23  (Kotlin DSL)
+
+
+FILE: ios/Runner/Info.plist  (only if you later target iOS)
+------------------------------------------------------------
+Add camera/photo library usage descriptions:
+
+    <key>NSCameraUsageDescription</key>
+    <string>Used to take photos of crop leaves for disease detection</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Used to select photos of crop leaves for disease detection</string>
+
+(Per the project notes, this app targets Android only — this section is
+included only in case that changes later.)

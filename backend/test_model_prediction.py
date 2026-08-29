@@ -14,9 +14,9 @@ if not os.path.exists(model_path):
     print("Please train the model first: python train_model.py")
     exit(1)
 
-print("📁 Loading model...")
+print(" Loading model...")
 model = tf.keras.models.load_model(model_path)
-print("✅ Model loaded successfully!")
+print("Model loaded successfully!")
 
 # Load class names
 class_names_path = "models/class_names.txt"
@@ -42,7 +42,7 @@ else:
     ]
 
 # Create a simple test image (random noise - for testing only)
-print("\n🔍 Creating test image...")
+print("\n Creating test image...")
 test_img = np.random.rand(224, 224, 3) * 255
 test_img = test_img.astype(np.uint8)
 

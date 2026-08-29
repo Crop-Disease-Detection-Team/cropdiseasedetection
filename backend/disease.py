@@ -193,7 +193,6 @@ def get_user_statistics():
         ).first()
         
         avg_confidence = round(avg_confidence_result[0] * 100, 2) if avg_confidence_result[0] else 0
-        
         # Get favorite diseases (most scanned)
         favorite_diseases = db.session.query(
             ScanHistory.disease_name,
@@ -256,7 +255,7 @@ def get_user_history():
             scans_list.append({
                 'id': scan.id,
                 'disease_name': scan.disease_name.replace('___', ' - ').replace('_', ' ') if scan.disease_name else 'Unknown',
-                'confidence': round(scan.confidence * 100, 2) if scan.confidence and scan.confidence < 1 else round(scan.confidence or 0, 2),
+                'confidence': float(round(scan.confidence * 100, 2)) if scan.confidence and scan.confidence < 1 else float(round(scan.confidence or 0, 2)),
                 'severity': severity,
                 'image_path': scan.image_path,
                 'scanned_at': scan.scanned_at.isoformat() if scan.scanned_at else None
